@@ -34,5 +34,5 @@ https://github.com/ropolexi/DeSo-Arduino-Lib/blob/master/DeSoLib.cpp#L656
 Serial.printf("\n[%s](%s) %s\n",genLocaltime(ts),username.c_str(),body.c_str());
 ```
 ## Serial output
-![Schematic](img/log.PNG)
+![Schematic](img/log.png)
 
