@@ -367,8 +367,8 @@ int DeSoLib::updateUsersBalance(const char *PublicKeysBase58Check, Profile *prof
     }
     if (!error)
     {
-        prof->BalanceNanos = doc["ConfirmedBalanceNanos"];
-        prof->UnconfirmedBalanceNanos = doc["UnconfirmedBalanceNanos"];
+        prof->BalanceNanos = doc["ConfirmedBalanceNanos"].as<double>();
+        prof->UnconfirmedBalanceNanos = doc["UnconfirmedBalanceNanos"].as<double>();
         status = 1;
     }
     else
