@@ -12,12 +12,12 @@ This is an unofficial personal arduino library for the DeSo (Decentralized Socia
 - Wallet Balance (V0 API)
 - All HODLE Asset balance
 - Wallet Balance
-- All HODLE Asset balance
 - Top 10 Hodlers
 - Last post like count
 - Last post diamond count
 - V1 API to get balance
 - Global Recent posts feed
+- Actual hodle asset sum 
 
 Note: Top 10 Hodlers (Recommand Top 5 in case memory issue)
 
@@ -85,8 +85,10 @@ ESP32 Module
 - const char *getPostsStateless(const char *messagePayload);
 - char *genLocaltime(time_t ts);
 - int updatePostsStateless(const char *postHashHex,const char *readerPublicKeyBase58Check,int numToFetch,bool getPostsForGlobalWhitelist,long timePeriod);
+- int updateHodlersValuesForPublicKey(const char *username, const char *PublicKeyBase58Check, Profile *prof);
 ## Changes
 - (2021-10-1) support old and new api changes due to rebranding.
+- (2022-12-3) calculate actual hodle assets value using bonding curve equation, avoid using updateUsersStateless due to high memory demand for that api when SkipHodlings is false instead use getUserBalance to get wallet balance and updateHodlersValuesForPublicKey to get hodle assets actual value
 ## Dependency Libraries
 ArduinoJson - https://github.com/bblanchon/ArduinoJson
 
