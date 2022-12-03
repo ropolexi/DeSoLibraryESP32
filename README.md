@@ -63,8 +63,8 @@ Total HODLE Asset Balance: $35.40
 
 ![esp32](esp32.jpg)
 
-ESP32 Module (US $5.99)
-https://www.ebay.com/itm/312621586322?hash=item48c9b2d792:g:BtUAAOSwYMlc4sAF
+ESP32 Module
+
 
 
 ## Functions
