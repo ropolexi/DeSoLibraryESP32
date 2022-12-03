@@ -40,6 +40,9 @@ void setup()
   deso.addNodePath("https://desocialworld.com", "");
   deso.addNodePath("https://supernovas.app", "");
   deso.addNodePath("https://diamondapp.com", "");
+  deso.addNodePath("https://node.post2earndao.com", "");
+  deso.addNodePath("https://web3social.network", "");
+  deso.addNodePath("https://beyond.restartu.org", "");
 
   deso.selectDefaultNode(0);
   lcd.clear();
