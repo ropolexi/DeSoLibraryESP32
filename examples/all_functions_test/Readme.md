@@ -29,7 +29,7 @@ const char wifi_pass[] = "";
 
 ## To change posts feed output format
 
-https://github.com/ropolexi/DeSo-Arduino-Lib/blob/master/DeSoLib.cpp#L656
+https://github.com/ropolexi/DeSo-Arduino-Lib/blob/master/DeSoLib.cpp#L446
 ```
 Serial.printf("\n[%s](%s) %s\n",genLocaltime(ts),username.c_str(),body.c_str());
 ```

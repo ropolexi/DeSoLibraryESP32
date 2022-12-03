@@ -75,7 +75,6 @@ public:
     const char *getSingleProfile(const char *messagePayload);
     int updateSingleProfile(const char *username, const char *PublicKeyBase58Check, Profile *prof);
     const char *getUsersStateless(const char *messagePayload);
-    int updateUsersStateless(const char *PublicKeysBase58Check, bool SkipHodlings, Profile *prof);
     const char *getHodlersForPublicKey(const char *messagePayload);
     int updateHodlersForPublicKey(const char *username, const char *PublicKeyBase58Check, int NumToFetch, Profile *prof);
     void clearTopHodlersUserNames(Profile *prof);
@@ -86,7 +85,11 @@ public:
     int updateUsersBalance(const char *PublicKeysBase58Check, Profile *prof);
     const char *getPostsStateless(const char *messagePayload);
     int updatePostsStateless(const char *postHashHex, const char *readerPublicKeyBase58Check, int numToFetch, bool getPostsForGlobalWhitelist, long timePeriod);
-    int updateHodlersValuesForPublicKey(const char *username, const char *PublicKeyBase58Check, Profile *prof);
+    const char *updateHodlersForPublicKey(const char *PublicKeyBase58Check,
+                                          const char *Username, const char *LastPublicKeyBase58Check, int NumToFetch,
+                                          bool IsDAOCoin, bool FetchHodlings, const char *SortType, bool FetchAll, Profile *prof);
+    int updateHodleAssetBalance(const char *username, const char *PublicKeyBase58Check, Profile *prof);
+    int updateTopHolders(const char *username, const char *PublicKeyBase58Check, int NumToFetch, Profile *prof);
     ~DeSoLib();
 
 private:

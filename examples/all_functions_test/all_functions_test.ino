@@ -123,7 +123,7 @@ void getProfile(const char *username)
   Serial.print("Wallet Balance:\t\t\t$");
   double balanceCents = deso.USDCentsPerBitCloutExchangeRate * (profile1.BalanceNanos / 1000000000.0);
   Serial.println(balanceCents / 100.0);
-  deso.updateHodlersValuesForPublicKey("", profile1.PublicKeyBase58Check, &profile1);
+  deso.updateHodleAssetBalance("", profile1.PublicKeyBase58Check, &profile1);
   Serial.print("Total HODL assets :\t\t");
   Serial.println(profile1.TotalHodleNum);
   Serial.print("Total HODL Asset Balance:\t$");
@@ -144,7 +144,7 @@ void getProfile(const char *username)
 
   deso.clearTopHodlersUserNames(&profile1);
 
-  deso.updateHodlersForPublicKey("", profile1.PublicKeyBase58Check, 10, &profile1);
+  deso.updateTopHolders("", profile1.PublicKeyBase58Check, 10, &profile1);
   Serial.println("\nTop 10 Creator Coins Hodlers:");
   for (int i = 0; i < 10; i++)
   {

@@ -108,12 +108,7 @@ void loop()
       lcd.setCursor(0, 1);
       lcd.print("C:$");
       lcd.print(temp, 1);
-      // status = deso.updateUsersStateless(userPublicKey, false, &profile1);
-      // if(!status){
-      //   Serial.println("user stateless error!");
-      //   nextServer();
-      //   continue;
-      // }
+  
       deso.updateUsersBalance(profile1.PublicKeyBase58Check, &profile1);
       
       Serial.print("Wallet Balance:");
@@ -126,7 +121,7 @@ void loop()
       lcd.print(temp, 1);
       Serial.println(balanceCents / 100.0);
       
-      deso.updateHodlersValuesForPublicKey("", profile1.PublicKeyBase58Check, &profile1);
+      deso.updateHodleAssetBalance("", profile1.PublicKeyBase58Check, &profile1);
       Serial.print("Total HODLE assets : ");
       Serial.println(profile1.TotalHodleNum);
       Serial.print("Total HODLE Asset Balance: $");
