@@ -88,7 +88,10 @@ ESP32 Module
 - int updateHodlersValuesForPublicKey(const char *username, const char *PublicKeyBase58Check, Profile *prof);
 ## Changes
 - (2021-10-1) support old and new api changes due to rebranding.
-- (2022-12-3) calculate actual hodle assets value using bonding curve equation, avoid using updateUsersStateless due to high memory demand for that api when SkipHodlings is false instead use getUserBalance to get wallet balance and updateHodlersValuesForPublicKey to get hodle assets actual value
+- (2022-12-3) 
+  - calculate actual hodle assets value using bonding curve equation
+  - avoid using updateUsersStateless due to high memory demand for that api when SkipHodlings is false
+  - use getUserBalance to get wallet balance and updateHodlersValuesForPublicKey to get hodle assets actual value
 ## Dependency Libraries
 ArduinoJson - https://github.com/bblanchon/ArduinoJson
 
