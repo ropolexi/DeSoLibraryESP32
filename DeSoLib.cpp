@@ -121,15 +121,19 @@ const char *DeSoLib::postRequest(const char *apiPath, const char *data)
             }
             else
             {
+                debug_print(httpCode);
             }
         }
         else
         {
+            debug_print("http error ");
         }
     }
     else
     {
+        debug_print("server error ");
     }
+    //Serial.printf("https size %d\n", https.getSize());
     https.end();
 
     // return buff_large;
@@ -166,7 +170,7 @@ int DeSoLib::updateExchangeRates()
     int status = 0;
     DynamicJsonDocument doc(1024);
     const char *payload = getExchangeRates();
-    debug_print(payload);
+    // debug_print(payload);
     DeserializationError error = deserializeJson(doc, payload);
     if (!error)
     {
@@ -478,7 +482,7 @@ const char *DeSoLib::updateHodlersForPublicKey(const char *PublicKeyBase58Check,
 {
 
     int status = 0;
-    static char postData[200];
+    static char postData[300];
     DynamicJsonDocument doc(ESP.getMaxAllocHeap() / 2 - 5000);
     if (strlen(PublicKeyBase58Check) > 1)
         doc["PublicKeyBase58Check"] = PublicKeyBase58Check;
@@ -492,7 +496,7 @@ const char *DeSoLib::updateHodlersForPublicKey(const char *PublicKeyBase58Check,
     if (strlen(SortType) > 1)
         doc["SortType"] = SortType;
     doc["FetchAll"] = FetchAll;
-
+    // serializeJsonPretty(doc, Serial);
     serializeJson(doc, postData);
     doc.clear();
     doc.garbageCollect();
@@ -501,7 +505,7 @@ const char *DeSoLib::updateHodlersForPublicKey(const char *PublicKeyBase58Check,
 
 /**
  * Get user's total holdles value.
- *
+ * Retrieve 10 at a time to avoid memory issue
  * Get all hodle creator coins and get actual sell values from bonding curve.
  * bonding curve equation 0.003T^2
  * integration gives the actual sell value
@@ -516,47 +520,61 @@ const char *DeSoLib::updateHodlersForPublicKey(const char *PublicKeyBase58Check,
 int DeSoLib::updateHodleAssetBalance(const char *username, const char *PublicKeyBase58Check, Profile *prof)
 {
     int status = 0;
-
-    const char *payload = updateHodlersForPublicKey(PublicKeyBase58Check, username, "", 1, false, true, "", true, prof);
-    // Serial.println(payload);
+    char PreLastPublicKey[60];
+    char LastPublicKey[60];
+    int count = 0;
+    double amount = 0;
+    memset(LastPublicKey, 0, sizeof(LastPublicKey));
     DynamicJsonDocument filter(300);
+    bool first = true;
+
+    filter["LastPublicKeyBase58Check"] = true;
     filter["Hodlers"][0]["BalanceNanos"] = true;
     filter["Hodlers"][0]["ProfileEntryResponse"]["CoinPriceDeSoNanos"] = true;
     filter["Hodlers"][0]["ProfileEntryResponse"]["CoinEntry"]["CoinsInCirculationNanos"] = true;
 
-    // Deserialize the document
-    DynamicJsonDocument doc(ESP.getMaxAllocHeap() / 2 - 5000);
-    DeserializationError error = deserializeJson(doc, payload, DeserializationOption::Filter(filter));
-    if (doc.isNull())
+    while (first || strlen(LastPublicKey) > 1)
     {
-        serializeJsonPretty(doc, Serial);
-    }
-    if (!error)
-    {
-        JsonArray arr = doc["Hodlers"].as<JsonArray>();
-        int count = 0;
-        double amount = 0;
+        first = false;
+        const char *payload;
+        strcpy(PreLastPublicKey, LastPublicKey);
+        payload = updateHodlersForPublicKey(PublicKeyBase58Check, username, LastPublicKey, 10, false, true, "", false, prof);
+        long heap_len = ESP.getMaxAllocHeap() / 2 - 5000;
+        DynamicJsonDocument doc(heap_len);
+        DeserializationError error = deserializeJson(doc, payload, DeserializationOption::Filter(filter));
 
-        for (JsonVariant value : arr)
+        if (doc.isNull())
         {
-            double bal = value["BalanceNanos"].as<double>();
-            bal /= 1000000000.0;
-            double total_coins = value["ProfileEntryResponse"]["CoinEntry"]["CoinsInCirculationNanos"].as<double>();
-            total_coins /= 1000000000.0;
-            double final_deso_value = pow(total_coins, bonding_curve_pow + 1) - pow((total_coins - bal), bonding_curve_pow + 1);
-            final_deso_value *= bonding_curve_gain / 3.0;
-            amount += final_deso_value;
-            count++;
+            serializeJsonPretty(doc, Serial);
         }
-        prof->TotalHODLBalanceClout = amount;
-        prof->TotalHodleNum = count;
-        status = 1;
+        if (!error && !doc.isNull() && doc.containsKey("Hodlers"))
+        {
+            status = 1;
+            strcpy(LastPublicKey, doc["LastPublicKeyBase58Check"]);
+            JsonArray arr = doc["Hodlers"].as<JsonArray>();
+
+            for (JsonVariant value : arr)
+            {
+                double bal = value["BalanceNanos"].as<double>();
+                bal /= 1000000000.0;
+                double total_coins = value["ProfileEntryResponse"]["CoinEntry"]["CoinsInCirculationNanos"].as<double>();
+                total_coins /= 1000000000.0;
+                double final_deso_value = pow(total_coins, bonding_curve_pow + 1) - pow((total_coins - bal), bonding_curve_pow + 1);
+                final_deso_value *= bonding_curve_gain / 3.0;
+                amount += final_deso_value;
+                count++;
+            }
+        }
+        else
+        {
+            status = 0;
+            debug_print("Json Error");
+        }
+        doc.garbageCollect();
     }
-    else
-    {
-        debug_print("Json Error");
-    }
-    doc.garbageCollect();
+    prof->TotalHODLBalanceClout = amount;
+    prof->TotalHodleNum = count;
+
     return status;
 }
 

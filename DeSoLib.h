@@ -5,13 +5,13 @@
 #include "WiFi.h"
 #include <stdlib.h>
 
-#define DEBUG_LOG false
+#define DEBUG_LOG true
 
 #define debug_print(...)               \
     do                                 \
     {                                  \
         if (DEBUG_LOG)                 \
-            Serial.print(__VA_ARGS__); \
+            Serial.println(__VA_ARGS__); \
     } while (0)
 class DeSoLib
 {
