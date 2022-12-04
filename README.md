@@ -105,7 +105,7 @@ ESP32 Module
   - calculate actual hodle assets value using bonding curve equation
   - avoid using updateUsersStateless due to high memory demand for that api when SkipHodlings is false
   - use getUserBalance to get wallet balance and updateHodleAssetBalance to get hodle assets actual value
-- (2022-12-4) Hodling asset balance for all the assets by retrieve 10 at a time 
+- (2022-12-4) Hodling asset balance for all the assets by retrieving 10 assets at a time to avoid memory overflow
 ## Dependency Libraries
 ArduinoJson - https://github.com/bblanchon/ArduinoJson
 
