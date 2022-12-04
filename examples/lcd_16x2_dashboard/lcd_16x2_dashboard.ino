@@ -53,6 +53,39 @@ void nextServer()
   if (server_index >= deso.getMaxNodes())
     server_index = 0;
 }
+
+void updateBalanceLCD(double value)
+{
+  lcd.setCursor(8, 1);
+  lcd.print("        ");
+  lcd.setCursor(8, 1);
+  lcd.print("B:$");
+  lcd.print(value, 1);
+}
+void updateHodingsLCD(double value)
+{
+  lcd.setCursor(8, 0);
+  lcd.print("        ");
+  lcd.setCursor(8, 0);
+  lcd.print("H:$");
+  lcd.print(value, 1);
+}
+void updateDeSoPriceLCD(double value)
+{
+  lcd.setCursor(0, 0);
+  lcd.print("        ");
+  lcd.setCursor(0, 0);
+  lcd.print("D:$");
+  lcd.print(value, 1);
+}
+void updateCreatorCoinLCD(double value)
+{
+  lcd.setCursor(0, 1);
+  lcd.print("        ");
+  lcd.setCursor(0, 1);
+  lcd.print("C:$");
+  lcd.print(value, 1);
+}
 void loop()
 {
   while (true)
@@ -81,11 +114,9 @@ void loop()
       Serial.print("DeSo Coin Value: $");
       double temp = deso.USDCentsPerBitCloutExchangeRate / 100.0;
       Serial.println(temp);
-      lcd.setCursor(0, 0);
-      lcd.print("        ");
-      lcd.setCursor(0, 0);
-      lcd.print("D:$");
-      lcd.print(temp, 1);
+
+      updateDeSoPriceLCD(temp);
+
       // Serial.println("BTC (USD):");
       // Serial.println(deso.USDCentsPerBitcoinExchangeRate/100.0);
       Serial.println("=======Profile========");
@@ -108,11 +139,8 @@ void loop()
       double coinPriceUSDCents = deso.USDCentsPerBitCloutExchangeRate * (profile1.CoinPriceBitCloutNanos / 1000000000.0);
       temp = coinPriceUSDCents / 100.0;
       Serial.println(temp);
-      lcd.setCursor(0, 1);
-      lcd.print("        ");
-      lcd.setCursor(0, 1);
-      lcd.print("C:$");
-      lcd.print(temp, 1);
+
+      updateCreatorCoinLCD(temp);
 
       if (deso.updateUsersBalance(profile1.PublicKeyBase58Check, &profile1))
       {
@@ -123,10 +151,7 @@ void loop()
         Serial.print(" $");
         Serial.println(temp);
 
-        lcd.print("        ");
-        lcd.setCursor(8, 1);
-        lcd.print("B:$");
-        lcd.print(temp, 1);
+        updateBalanceLCD(temp);
       }
 
       if (deso.updateHodleAssetBalance("", profile1.PublicKeyBase58Check, &profile1))
@@ -134,14 +159,10 @@ void loop()
         Serial.print("Total HODLE assets : ");
         Serial.println(profile1.TotalHodleNum);
         Serial.print("Total HODLE Asset Balance: $");
-        double assetsValue = (profile1.TotalHODLBalanceClout * deso.USDCentsPerBitCloutExchangeRate) / 100.0;
-        Serial.println(assetsValue);
-        lcd.setCursor(8, 0);
-        lcd.print("        ");
-        lcd.setCursor(8, 0);
-        temp = assetsValue;
-        lcd.print("H:$");
-        lcd.print(temp, 1);
+        temp = (profile1.TotalHODLBalanceClout * deso.USDCentsPerBitCloutExchangeRate) / 100.0;
+        Serial.println(temp);
+
+        updateHodingsLCD(temp);
       }
       Serial.println("======================");
     }
