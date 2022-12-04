@@ -110,4 +110,4 @@ ESP32 Module
 ArduinoJson - https://github.com/bblanchon/ArduinoJson
 
 
-**This library does not need any seed phrase to access any account**
+**DeSoLibraryESP32 library does not need any seed phrase to access any account. This library is for monitoring purposes only**
