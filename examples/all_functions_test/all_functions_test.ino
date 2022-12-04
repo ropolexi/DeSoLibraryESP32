@@ -136,11 +136,11 @@ void getProfile(const char *username)
   Serial.print("Last 5 Post Diamonds:\t\t");
   Serial.println(profile1.lastNPostDiamonds);
 
-  deso.updateLastPostForPublicKey(profile1.PublicKeyBase58Check, &profile1);
+  deso.updateLastNumPostsForPublicKey(profile1.PublicKeyBase58Check,1, &profile1);
   Serial.print("Last Post Likes:\t\t");
-  Serial.println(profile1.lastPostLikes);
+  Serial.println(profile1.lastNPostLikes);
   Serial.print("Last Post Diamonds:\t\t");
-  Serial.println(profile1.lastPostDiamonds);
+  Serial.println(profile1.lastNPostDiamonds);
 
   deso.clearTopHodlersUserNames(&profile1);
 

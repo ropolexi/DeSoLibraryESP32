@@ -1,7 +1,7 @@
 # DeSo Arduino Library
 
 ## Introduction
-This is an unofficial personal arduino library for the DeSo (Decentralized Social) Blockchain.
+This is an unofficial personal arduino library to monitor the DeSo (Decentralized Social Network).
 
 "DeSo is a new layer-1 blockchain built from the ground up to scale decentralized social applications to one billion users" [https://www.deso.org]
 

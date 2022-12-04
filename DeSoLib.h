@@ -46,8 +46,6 @@ public:
         char TopHodlersUserNames[10][20];
         double TopHodlersCoins[10];
         double TopHodlersCoinsPerc[10];
-        int lastPostDiamonds = 0;
-        int lastPostLikes = 0;
         int lastNPostLikes = 0;
         int lastNPostDiamonds = 0;
     };
@@ -79,7 +77,7 @@ public:
     int updateHodlersForPublicKey(const char *username, const char *PublicKeyBase58Check, int NumToFetch, Profile *prof);
     void clearTopHodlersUserNames(Profile *prof);
     const char *getPostsForPublicKey(const char *messagePayload);
-    int updateLastPostForPublicKey(const char *PublicKeysBase58Check, Profile *prof);
+    //(const char *PublicKeysBase58Check, Profile *prof);
     int updateLastNumPostsForPublicKey(const char *PublicKeysBase58Check, int NumToFetch, Profile *prof);
     const char *getUserBalance(const char *messagePayload);
     int updateUsersBalance(const char *PublicKeysBase58Check, Profile *prof);
