@@ -77,7 +77,6 @@ public:
     int updateHodlersForPublicKey(const char *username, const char *PublicKeyBase58Check, int NumToFetch, Profile *prof);
     void clearTopHodlersUserNames(Profile *prof);
     const char *getPostsForPublicKey(const char *messagePayload);
-    //(const char *PublicKeysBase58Check, Profile *prof);
     int updateLastNumPostsForPublicKey(const char *PublicKeysBase58Check, int NumToFetch, Profile *prof);
     const char *getUserBalance(const char *messagePayload);
     int updateUsersBalance(const char *PublicKeysBase58Check, Profile *prof);
