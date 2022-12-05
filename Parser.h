@@ -2,12 +2,14 @@
 
 #include "JsonListener.h"
 
-class ExampleListener: public JsonListener {
+class Listener: public JsonListener {
 
   public:
-    bool stopDecoding;
-    double ConfirmedBalanceNanos;
-    double UnconfirmedBalanceNanos;
+    String _key;
+    String _value;
+    bool keyFound;
+    bool valueFound;
+
     virtual void whitespace(char c);
   
     virtual void startDocument();

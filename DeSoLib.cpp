@@ -5,10 +5,8 @@
 #include "math.h"
 #include "JsonStreamingParser.h"
 #include "JsonListener.h"
-#include "ExampleParser.h"
+#include "Parser.h"
 
-JsonStreamingParser parser;
-ExampleListener listener;
 #define DEBUG_LOG false
 
 DeSoLib::DeSoLib()
@@ -332,36 +330,38 @@ int DeSoLib::updateUsersBalance(const char *PublicKeysBase58Check, Profile *prof
     serializeJson(doc, postData);
     doc.clear();
     const char *payload = getUserBalance(postData);
+
+    // Using JsonStreamingParser library to extract only needed data and to avoid UTXOs
+    JsonStreamingParser parser;
+    Listener listener;
     parser.setListener(&listener);
-    // put your setup code here, to run once:
-    listener.stopDecoding = false;
+    String key;
+    String value;
     for (int i = 0; i < strlen(payload); i++)
     {
+        listener.keyFound = false;
+        listener.valueFound = false;
         parser.parse(payload[i]);
-        if (listener.stopDecoding)
-            break;
+
+        if (listener.keyFound)
+        {
+            if (listener._key.equals("UTXOs"))
+                break;
+            key = listener._key;
+        }
+        else if (listener.valueFound)
+        {
+            if (key.equals("ConfirmedBalanceNanos"))
+                prof->BalanceNanos = listener._value.toDouble();
+            else if (key.equals("UnconfirmedBalanceNanos"))
+                prof->UnconfirmedBalanceNanos = listener._value.toDouble();
+        }
     }
 
-    DynamicJsonDocument filter(100);
-    filter["ConfirmedBalanceNanos"] = true;
-    filter["UnconfirmedBalanceNanos"] = true;
+    // prof->BalanceNanos = listener.ConfirmedBalanceNanos;
+    // prof->UnconfirmedBalanceNanos = listener.UnconfirmedBalanceNanos;
+    status = 1;
 
-    // Deserialize the document
-    DeserializationError error = deserializeJson(doc, payload, DeserializationOption::Filter(filter));
-    if (doc.isNull())
-    {
-        serializeJsonPretty(doc, Serial);
-    }
-    if (!error)
-    {
-        prof->BalanceNanos = doc["ConfirmedBalanceNanos"].as<double>();
-        prof->UnconfirmedBalanceNanos = doc["UnconfirmedBalanceNanos"].as<double>();
-        status = 1;
-    }
-    else
-    {
-        debug_print("Json Error");
-    }
     doc.garbageCollect();
     return status;
 }
