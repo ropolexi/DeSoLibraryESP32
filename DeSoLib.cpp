@@ -3,6 +3,12 @@
 #include <HTTPClient.h>
 #include "ArduinoJson.h"
 #include "math.h"
+#include "JsonStreamingParser.h"
+#include "JsonListener.h"
+#include "ExampleParser.h"
+
+JsonStreamingParser parser;
+ExampleListener listener;
 #define DEBUG_LOG false
 
 DeSoLib::DeSoLib()
@@ -133,7 +139,7 @@ const char *DeSoLib::postRequest(const char *apiPath, const char *data)
     {
         debug_print("server error ");
     }
-    //Serial.printf("https size %d\n", https.getSize());
+    // Serial.printf("https size %d\n", https.getSize());
     https.end();
 
     // return buff_large;
@@ -316,6 +322,7 @@ const char *DeSoLib::getUserBalance(const char *messagePayload)
 {
     return postRequest(RoutePathGetBalance, messagePayload);
 }
+
 int DeSoLib::updateUsersBalance(const char *PublicKeysBase58Check, Profile *prof)
 {
     int status = 0;
@@ -325,6 +332,16 @@ int DeSoLib::updateUsersBalance(const char *PublicKeysBase58Check, Profile *prof
     serializeJson(doc, postData);
     doc.clear();
     const char *payload = getUserBalance(postData);
+    parser.setListener(&listener);
+    // put your setup code here, to run once:
+    listener.stopDecoding = false;
+    for (int i = 0; i < strlen(payload); i++)
+    {
+        parser.parse(payload[i]);
+        if (listener.stopDecoding)
+            break;
+    }
+
     DynamicJsonDocument filter(100);
     filter["ConfirmedBalanceNanos"] = true;
     filter["UnconfirmedBalanceNanos"] = true;

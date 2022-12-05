@@ -24,6 +24,7 @@ public:
     const char *RoutePathGetUsersStateless = "/api/v0/get-users-stateless";
     const char *RoutePathGetHodlersForPublicKey = "/api/v0/get-hodlers-for-public-key";
     const char *RoutePathGetPostsForPublicKey = "/api/v0/get-posts-for-public-key";
+    const char *RoutePathGetSinglePost = "/api/v0/get-single-post";
     const char *RoutePathGetBalance = "/api/v1/balance";
     const char *RoutePathGetPostsStateless = "/api/v0/get-posts-stateless";
 
@@ -49,7 +50,6 @@ public:
         int lastNPostLikes = 0;
         int lastNPostDiamonds = 0;
     };
-
     char buff_small_1[200];
     char buff_small_2[200];
     char buff_large[1024]; // heavy usage on web response
@@ -87,6 +87,9 @@ public:
                                           bool IsDAOCoin, bool FetchHodlings, const char *SortType, bool FetchAll, Profile *prof);
     int updateHodleAssetBalance(const char *username, const char *PublicKeyBase58Check, Profile *prof);
     int updateTopHolders(const char *username, const char *PublicKeyBase58Check, int NumToFetch, Profile *prof);
+    const char *getSinglePost(const char *messagePayload);
+    const char *updateSinglePost(const char *PostHashHex, bool FetchParents, int CommentOffset, int CommentLimit, const char *ReaderPublicKeyBase58Check,Profile *prof);
+    const char *getComments(const char *PostHashHex,int CommentOffset,int CommentLimit);
     ~DeSoLib();
 
 private:
