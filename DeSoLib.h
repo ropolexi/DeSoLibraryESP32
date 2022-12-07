@@ -6,7 +6,7 @@
 #include <stdlib.h>
 
 #define DEBUG_LOG true
-
+#define MAX_RESPONSE_SIZE 30000
 #define debug_print(...)               \
     do                                 \
     {                                  \
@@ -52,8 +52,8 @@ public:
     };
     char buff_small_1[200];
     char buff_small_2[200];
-    char buff_large[1024]; // heavy usage on web response
-
+    //char buff_large[1024]; // heavy usage on web response
+    char *buff_response;
     double USDCentsPerBitCloutExchangeRate;
     double USDCentsPerBitcoinExchangeRate;
 
