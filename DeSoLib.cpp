@@ -526,6 +526,7 @@ int DeSoLib::updateHodleAssetBalance(const char *username, const char *PublicKey
 
     filter["LastPublicKeyBase58Check"] = true;
     filter["Hodlers"][0]["BalanceNanos"] = true;
+    filter["Hodlers"][0]["ProfileEntryResponse"]["Username"] = true;
     filter["Hodlers"][0]["ProfileEntryResponse"]["CoinPriceDeSoNanos"] = true;
     filter["Hodlers"][0]["ProfileEntryResponse"]["CoinEntry"]["CoinsInCirculationNanos"] = true;
 
@@ -549,7 +550,7 @@ int DeSoLib::updateHodleAssetBalance(const char *username, const char *PublicKey
             status = 1;
             strcpy(LastPublicKey, doc["LastPublicKeyBase58Check"]);
             JsonArray arr = doc["Hodlers"].as<JsonArray>();
-
+            
             for (JsonVariant value : arr)
             {
                 double bal = value["BalanceNanos"].as<double>();
@@ -558,6 +559,12 @@ int DeSoLib::updateHodleAssetBalance(const char *username, const char *PublicKey
                 total_coins /= 1000000000.0;
                 double final_deso_value = pow(total_coins, bonding_curve_pow + 1) - pow((total_coins - bal), bonding_curve_pow + 1);
                 final_deso_value *= bonding_curve_gain / 3.0;
+                #if DEBUG_LOG == true
+                Serial.print(value["ProfileEntryResponse"]["Username"].as<char *>());
+                Serial.print(":");
+                Serial.print((final_deso_value * USDCentsPerBitCloutExchangeRate)/100.0);
+                Serial.printf("(%f)\n",bal);
+                #endif
                 amount += final_deso_value;
                 count++;
             }
