@@ -7,7 +7,7 @@
 #include "JsonListener.h"
 #include "Parser.h"
 
-#define DEBUG_LOG false
+#define DEBUG_LOG true
 
 DeSoLib::DeSoLib()
 {
@@ -278,6 +278,64 @@ void DeSoLib::clearTopHodlersUserNames(Profile *prof)
 const char *DeSoLib::getPostsForPublicKey(const char *messagePayload)
 {
     return postRequest(RoutePathGetPostsForPublicKey, messagePayload);
+}
+
+const char *DeSoLib::getSinglePost(const char *messagePayload)
+{
+    return postRequest(RoutePathGetSinglePost, messagePayload);
+}
+
+int DeSoLib::updateSinglePost(const char *postHashHex, bool fetchParents, int commentOffset, int commentLimit, const char *readerPublicKeyBase58Check,bool addGlobalFeedBool, Post *post)
+{
+    int status = 0;
+    static char postData[1024];
+    DynamicJsonDocument doc(ESP.getMaxAllocHeap() / 2 - 5000);
+    strlen(postHashHex) > 0 ? doc["PostHashHex"] = postHashHex : doc["PostHashHex"]="";
+    doc["FetchParents"] = fetchParents;
+    doc["CommentOffset"] = commentOffset;
+    doc["CommentLimit"] = commentLimit;
+    strlen(readerPublicKeyBase58Check)>0 ? doc["ReaderPublicKeyBase58Check"] = readerPublicKeyBase58Check:doc["ReaderPublicKeyBase58Check"] ="";
+    doc["AddGlobalFeedBool"] = addGlobalFeedBool;
+
+    serializeJson(doc, postData);
+    doc.clear();
+    buff_response = (char*)malloc(MAX_RESPONSE_SIZE);
+    const char *payload = getSinglePost(postData);
+    //Serial.println(payload);
+    DynamicJsonDocument filter(200);
+    filter["PostFound"]["PostHashHex"]=true;
+    filter["PostFound"]["Body"]=true;
+    filter["PostFound"]["LikeCount"]=true;
+    filter["PostFound"]["DiamondCount"]=true;
+    filter["PostFound"]["RepostCount"]=true;
+    filter["PostFound"]["QuoteRepostCount"]=true;
+    filter["PostFound"]["PostEntryReaderState"]["LikedByReader"] = true;
+  
+    // Deserialize the document
+    DeserializationError error = deserializeJson(doc, payload, DeserializationOption::Filter(filter));
+    free(buff_response);
+    if (doc.isNull())
+    {
+        serializeJsonPretty(doc, Serial);
+    }
+    if (!error)
+    {
+        strncpy(post->PostHashHex,doc["PostFound"]["PostHashHex"].as<char *>(),sizeof(post->PostHashHex));
+        strncpy(post->Body,doc["PostFound"]["Body"].as<char *>(),sizeof(post->Body));
+        post->LikeCount =  doc["PostFound"]["LikeCount"].as<int>();
+        post->DiamondCount = doc["PostFound"]["DiamondCount"].as<int>();
+        post->RepostCount = doc["PostFound"]["RepostCount"].as<int>();
+        post->QuoteRepostCount = doc["PostFound"]["QuoteRepostCount"].as<int>();
+        post->LikedByReader = doc["PostFound"]["PostEntryReaderState"]["LikedByReader"].as<bool>();
+        status = 1;
+    }
+    else
+    {
+        debug_print("Json Error");
+    }
+    
+    doc.garbageCollect();
+    return status;
 }
 
 int DeSoLib::updateLastNumPostsForPublicKey(const char *PublicKeysBase58Check, int NumToFetch, Profile *prof)

@@ -34,6 +34,17 @@ public:
         bool status = false;
         const char *caRootCert;
     };
+    struct Post
+    {
+        char PostHashHex[65];
+        char Body[1024];
+        int LikeCount=0;
+        int DiamondCount=0;
+        int CommentCount=0;
+        int RepostCount=0;
+        int QuoteRepostCount=0;
+        bool LikedByReader=false;
+    };
     struct Profile
     {
         char PublicKeyBase58Check[56];
@@ -76,6 +87,8 @@ public:
     const char *getHodlersForPublicKey(const char *messagePayload);
     int updateHodlersForPublicKey(const char *username, const char *PublicKeyBase58Check, int NumToFetch, Profile *prof);
     void clearTopHodlersUserNames(Profile *prof);
+    const char *getSinglePost(const char *messagePayload);
+    int updateSinglePost(const char *postHashHex, bool fetchParents, int commentOffset, int commentLimit, const char *readerPublicKeyBase58Check,bool addGlobalFeedBool, Post *post);
     const char *getPostsForPublicKey(const char *messagePayload);
     int updateLastNumPostsForPublicKey(const char *PublicKeysBase58Check, int NumToFetch, Profile *prof);
     const char *getUserBalance(const char *messagePayload);
