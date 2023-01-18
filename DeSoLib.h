@@ -56,6 +56,7 @@ public:
         double TotalHODLBalanceClout = 0;
         int TotalHodleNum = 0;
         char TopHodlersUserNames[10][20];
+        char TopHodlersPublicKeyBase58Check[10][56];
         double TopHodlersCoins[10];
         double TopHodlersCoinsPerc[10];
         int lastNPostLikes = 0;

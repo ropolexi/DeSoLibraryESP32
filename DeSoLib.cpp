@@ -650,10 +650,11 @@ int DeSoLib::updateTopHolders(const char *username, const char *PublicKeyBase58C
     }
     buff_response = (char*)malloc(MAX_RESPONSE_SIZE);
     const char *payload = updateHodlersForPublicKey(PublicKeyBase58Check, "", "", NumToFetch, false, false, "", false, prof);
-
+    //Serial.println(payload);
     DynamicJsonDocument filter(300);
     filter["Hodlers"][0]["BalanceNanos"] = true;
     filter["Hodlers"][0]["ProfileEntryResponse"]["Username"] = true;
+    filter["Hodlers"][0]["ProfileEntryResponse"]["PublicKeyBase58Check"]=true;
     // Deserialize the document
     DynamicJsonDocument doc(ESP.getMaxAllocHeap() / 2 - 5000);
     DeserializationError error = deserializeJson(doc, payload, DeserializationOption::Filter(filter));
@@ -675,6 +676,7 @@ int DeSoLib::updateTopHolders(const char *username, const char *PublicKeyBase58C
             prof->TopHodlersCoins[count] = coins;
             prof->TopHodlersCoinsPerc[count] = coins * 100 / total_supply;
             strncpy(prof->TopHodlersUserNames[count], value["ProfileEntryResponse"]["Username"].as<char *>(), sizeof(prof->TopHodlersUserNames[count]));
+            strncpy(prof->TopHodlersPublicKeyBase58Check[count], value["ProfileEntryResponse"]["PublicKeyBase58Check"].as<char *>(), sizeof(prof->TopHodlersPublicKeyBase58Check[count]));
             count++;
             if (count >= 10)
                 break;
