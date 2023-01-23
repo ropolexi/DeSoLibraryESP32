@@ -1,7 +1,7 @@
 # DeSo Post Feed
 
 ## Introduction
-This is to demostrate the use of deso library to display deso user information with esp32 microcontroller 
+This is to demonstrate the use of deso library to display deso user information with esp32 microcontroller 
 
 ## Pre requisite libraries
 - https://github.com/bblanchon/ArduinoJson

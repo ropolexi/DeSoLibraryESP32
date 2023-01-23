@@ -1,7 +1,7 @@
 # DeSo relay controller for top coin holder
 
 ## Introduction
-This is to demostrate the use of deso library. 
+This is to demonstrate the use of deso library. 
 Top coin holder has the power to control the relay. Every 10 seconds ESP32 chip check for the top coin holder of the relevant user and give the relay control power to that top coin holder with the use of a specific post like button.
 
 ## Pre requisite libraries

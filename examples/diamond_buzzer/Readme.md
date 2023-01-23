@@ -1,7 +1,7 @@
 # DeSo diamond buzzer
 
 ## Introduction
-This is to demostrate the use of deso library. 
+This is to demonstrate the use of deso library. 
 This device will give out a buzzer sound when someone gives me diamonds and indicator for LIKES for the latest 5 posts and also another indicator will light when there is a balance change.
 
 ## Pre requisite libraries
