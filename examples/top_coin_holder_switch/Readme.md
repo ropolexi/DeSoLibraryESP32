@@ -1,4 +1,4 @@
-# DeSo Post Feed
+# DeSo relay controller for top coin holder
 
 ## Introduction
 This is to demostrate the use of deso library. 
