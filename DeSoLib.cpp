@@ -595,6 +595,7 @@ int DeSoLib::updateHodleAssetBalance(const char *username, const char *PublicKey
         strcpy(PreLastPublicKey, LastPublicKey);
         buff_response = (char*)malloc(MAX_RESPONSE_SIZE);
         payload = updateHodlersForPublicKey(PublicKeyBase58Check, username, LastPublicKey, 10, false, true, "", false, prof);
+        //Serial.println(payload);
         long heap_len = ESP.getMaxAllocHeap() / 2 - 5000;
         DynamicJsonDocument doc(heap_len);
         DeserializationError error = deserializeJson(doc, payload, DeserializationOption::Filter(filter));
@@ -603,9 +604,11 @@ int DeSoLib::updateHodleAssetBalance(const char *username, const char *PublicKey
         {
             serializeJsonPretty(doc, Serial);
         }
+        //serializeJsonPretty(doc, Serial);
         if (!error && !doc.isNull() && doc.containsKey("Hodlers"))
         {
             status = 1;
+            
             strcpy(LastPublicKey, doc["LastPublicKeyBase58Check"]);
             JsonArray arr = doc["Hodlers"].as<JsonArray>();
             
