@@ -349,6 +349,7 @@ int DeSoLib::updateLastNumPostsForPublicKey(const char *PublicKeysBase58Check, i
     doc.clear();
     buff_response = (char*)malloc(MAX_RESPONSE_SIZE);
     const char *payload = getPostsForPublicKey(postData);
+    //Serial.println(payload);
     DynamicJsonDocument filter(200);
     filter["Posts"][0]["LikeCount"] = true;
     filter["Posts"][0]["DiamondCount"] = true;

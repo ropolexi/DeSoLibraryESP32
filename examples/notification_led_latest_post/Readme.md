@@ -2,7 +2,11 @@
 
 ## Introduction
 This is to demonstrate the use of deso library. 
-This device will check latest post of a user and give out a buzzer sound when someone gives diamonds. Also another indicator will light when there is a balance change. Also it will indicate how many likes and diamonds are there upto 5 from the leds.
+This device will check latest post of a user and give out a buzzer sound when someone gives diamonds. 
+
+An indicator will light when there is a balance change. 
+
+An indicate will show how many likes and diamonds are there upto 5 from the leds.
 
 ## Pre requisite libraries
 - https://github.com/bblanchon/ArduinoJson
