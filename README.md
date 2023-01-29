@@ -106,8 +106,10 @@ ESP32 Module
   - avoid using updateUsersStateless due to high memory demand for that api when SkipHodlings is false
   - use getUserBalance to get wallet balance and updateHodleAssetBalance to get hodle assets actual value
 - (2022-12-4) Hodling asset balance for all the assets by retrieving 10 assets at a time to avoid memory overflow
+- (2022-12-5) wallet balance json decode using json-streaming-parser to avoid long list of UTXOs (unpend transactions). Now faster decoding for wallet balance.
 ## Dependency Libraries
 ArduinoJson - https://github.com/bblanchon/ArduinoJson
+json-streaming-parser - https://github.com/squix78/json-streaming-parser
 
 
 **DeSoLibraryESP32 library does not need any seed phrase to access any account. This library is for monitoring purposes only**

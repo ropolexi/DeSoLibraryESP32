@@ -6,7 +6,7 @@
 #include <stdlib.h>
 
 #define DEBUG_LOG true
-
+#define MAX_RESPONSE_SIZE 30000
 #define debug_print(...)               \
     do                                 \
     {                                  \
@@ -34,6 +34,17 @@ public:
         bool status = false;
         const char *caRootCert;
     };
+    struct Post
+    {
+        char PostHashHex[65];
+        char Body[1024];
+        int LikeCount=0;
+        int DiamondCount=0;
+        int CommentCount=0;
+        int RepostCount=0;
+        int QuoteRepostCount=0;
+        bool LikedByReader=false;
+    };
     struct Profile
     {
         char PublicKeyBase58Check[56];
@@ -45,16 +56,16 @@ public:
         double TotalHODLBalanceClout = 0;
         int TotalHodleNum = 0;
         char TopHodlersUserNames[10][20];
+        char TopHodlersPublicKeyBase58Check[10][56];
         double TopHodlersCoins[10];
         double TopHodlersCoinsPerc[10];
         int lastNPostLikes = 0;
         int lastNPostDiamonds = 0;
     };
-
     char buff_small_1[200];
     char buff_small_2[200];
-    char buff_large[1024]; // heavy usage on web response
-
+    //char buff_large[1024]; // heavy usage on web response
+    char *buff_response;
     double USDCentsPerBitCloutExchangeRate;
     double USDCentsPerBitcoinExchangeRate;
 
@@ -77,6 +88,8 @@ public:
     const char *getHodlersForPublicKey(const char *messagePayload);
     int updateHodlersForPublicKey(const char *username, const char *PublicKeyBase58Check, int NumToFetch, Profile *prof);
     void clearTopHodlersUserNames(Profile *prof);
+    const char *getSinglePost(const char *messagePayload);
+    int updateSinglePost(const char *postHashHex, bool fetchParents, int commentOffset, int commentLimit, const char *readerPublicKeyBase58Check,bool addGlobalFeedBool, Post *post);
     const char *getPostsForPublicKey(const char *messagePayload);
     int updateLastNumPostsForPublicKey(const char *PublicKeysBase58Check, int NumToFetch, Profile *prof);
     const char *getUserBalance(const char *messagePayload);
@@ -88,9 +101,9 @@ public:
                                           bool IsDAOCoin, bool FetchHodlings, const char *SortType, bool FetchAll, Profile *prof);
     int updateHodleAssetBalance(const char *username, const char *PublicKeyBase58Check, Profile *prof);
     int updateTopHolders(const char *username, const char *PublicKeyBase58Check, int NumToFetch, Profile *prof);
-    const char *getSinglePost(const char *messagePayload);
-    const char *updateSinglePost(const char *PostHashHex, bool FetchParents, int CommentOffset, int CommentLimit, const char *ReaderPublicKeyBase58Check,Profile *prof);
-    const char * getComments(const char *PostHashHex,int CommentOffset,int CommentLimit);
+    //const char *getSinglePost(const char *messagePayload);
+    //const char *updateSinglePost(const char *PostHashHex, bool FetchParents, int CommentOffset, int CommentLimit, const char *ReaderPublicKeyBase58Check,Profile *prof);
+    //const char *getComments(const char *PostHashHex,int CommentOffset,int CommentLimit);
     ~DeSoLib();
 
 private:
