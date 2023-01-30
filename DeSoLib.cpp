@@ -42,7 +42,7 @@ const char *DeSoLib::getRequest(const char *apiPath)
     HTTPClient https;
     // char url_str[100];
     const char *buff_ptr;
-    //memset(buff_large, 0, sizeof(buff_large));
+    // memset(buff_large, 0, sizeof(buff_large));
     if (strcmp(nodePaths[selectedNodeIndex].caRootCert, ""))
     {
         espClientSecure.setCACert(nodePaths[selectedNodeIndex].caRootCert);
@@ -116,8 +116,8 @@ const char *DeSoLib::postRequest(const char *apiPath, const char *data)
 
                 // if (https.getSize() < 80000)
                 //{
-                https.getString().toCharArray(buff_response,MAX_RESPONSE_SIZE);
-                buff_ptr=buff_response;
+                https.getString().toCharArray(buff_response, MAX_RESPONSE_SIZE);
+                buff_ptr = buff_response;
                 if (strcmp(buff_ptr, "") == 0)
                 {
                     buff_ptr = buff_null;
@@ -171,7 +171,6 @@ HTTPClient *DeSoLib::postRequestNew(const char *apiPath, const char *data)
             if (httpCode == HTTP_CODE_OK)
             {
                 return &https;
-               
             }
             else
             {
@@ -199,7 +198,7 @@ const char *DeSoLib::getNodeHealthCheck()
 int DeSoLib::updateNodeHealthCheck()
 {
     int status = 0;
-    buff_response = (char*)malloc(MAX_RESPONSE_SIZE);
+    buff_response = (char *)malloc(MAX_RESPONSE_SIZE);
     if (strcmp(getNodeHealthCheck(), "200") == 0)
     {
         status = 1;
@@ -222,7 +221,7 @@ int DeSoLib::updateExchangeRates()
 {
     int status = 0;
     DynamicJsonDocument doc(1024);
-    buff_response = (char*)malloc(MAX_RESPONSE_SIZE);
+    buff_response = (char *)malloc(MAX_RESPONSE_SIZE);
     const char *payload = getExchangeRates();
     // debug_print(payload);
     DeserializationError error = deserializeJson(doc, payload);
@@ -261,7 +260,7 @@ int DeSoLib::updateSingleProfile(const char *username, const char *PublicKeyBase
 
     serializeJson(doc, postData);
     doc.clear();
-    buff_response = (char*)malloc(MAX_RESPONSE_SIZE);
+    buff_response = (char *)malloc(MAX_RESPONSE_SIZE);
     const char *payload = getSingleProfile(postData);
     DeserializationError error = deserializeJson(doc, payload);
     free(buff_response);
@@ -331,32 +330,32 @@ const char *DeSoLib::getSinglePost(const char *messagePayload)
     return postRequest(RoutePathGetSinglePost, messagePayload);
 }
 
-int DeSoLib::updateSinglePost(const char *postHashHex, bool fetchParents, int commentOffset, int commentLimit, const char *readerPublicKeyBase58Check,bool addGlobalFeedBool, Post *post)
+int DeSoLib::updateSinglePost(const char *postHashHex, bool fetchParents, int commentOffset, int commentLimit, const char *readerPublicKeyBase58Check, bool addGlobalFeedBool, Post *post)
 {
     int status = 0;
     static char postData[1024];
     DynamicJsonDocument doc(ESP.getMaxAllocHeap() / 2 - 5000);
-    strlen(postHashHex) > 0 ? doc["PostHashHex"] = postHashHex : doc["PostHashHex"]="";
+    strlen(postHashHex) > 0 ? doc["PostHashHex"] = postHashHex : doc["PostHashHex"] = "";
     doc["FetchParents"] = fetchParents;
     doc["CommentOffset"] = commentOffset;
     doc["CommentLimit"] = commentLimit;
-    strlen(readerPublicKeyBase58Check)>0 ? doc["ReaderPublicKeyBase58Check"] = readerPublicKeyBase58Check:doc["ReaderPublicKeyBase58Check"] ="";
+    strlen(readerPublicKeyBase58Check) > 0 ? doc["ReaderPublicKeyBase58Check"] = readerPublicKeyBase58Check : doc["ReaderPublicKeyBase58Check"] = "";
     doc["AddGlobalFeedBool"] = addGlobalFeedBool;
 
     serializeJson(doc, postData);
     doc.clear();
-    buff_response = (char*)malloc(MAX_RESPONSE_SIZE);
+    buff_response = (char *)malloc(MAX_RESPONSE_SIZE);
     const char *payload = getSinglePost(postData);
-    //Serial.println(payload);
+    // Serial.println(payload);
     DynamicJsonDocument filter(200);
-    filter["PostFound"]["PostHashHex"]=true;
-    filter["PostFound"]["Body"]=true;
-    filter["PostFound"]["LikeCount"]=true;
-    filter["PostFound"]["DiamondCount"]=true;
-    filter["PostFound"]["RepostCount"]=true;
-    filter["PostFound"]["QuoteRepostCount"]=true;
+    filter["PostFound"]["PostHashHex"] = true;
+    filter["PostFound"]["Body"] = true;
+    filter["PostFound"]["LikeCount"] = true;
+    filter["PostFound"]["DiamondCount"] = true;
+    filter["PostFound"]["RepostCount"] = true;
+    filter["PostFound"]["QuoteRepostCount"] = true;
     filter["PostFound"]["PostEntryReaderState"]["LikedByReader"] = true;
-  
+
     // Deserialize the document
     DeserializationError error = deserializeJson(doc, payload, DeserializationOption::Filter(filter));
     free(buff_response);
@@ -366,9 +365,9 @@ int DeSoLib::updateSinglePost(const char *postHashHex, bool fetchParents, int co
     }
     if (!error)
     {
-        strncpy(post->PostHashHex,doc["PostFound"]["PostHashHex"].as<char *>(),sizeof(post->PostHashHex));
-        strncpy(post->Body,doc["PostFound"]["Body"].as<char *>(),sizeof(post->Body));
-        post->LikeCount =  doc["PostFound"]["LikeCount"].as<int>();
+        strncpy(post->PostHashHex, doc["PostFound"]["PostHashHex"].as<char *>(), sizeof(post->PostHashHex));
+        strncpy(post->Body, doc["PostFound"]["Body"].as<char *>(), sizeof(post->Body));
+        post->LikeCount = doc["PostFound"]["LikeCount"].as<int>();
         post->DiamondCount = doc["PostFound"]["DiamondCount"].as<int>();
         post->RepostCount = doc["PostFound"]["RepostCount"].as<int>();
         post->QuoteRepostCount = doc["PostFound"]["QuoteRepostCount"].as<int>();
@@ -379,7 +378,7 @@ int DeSoLib::updateSinglePost(const char *postHashHex, bool fetchParents, int co
     {
         debug_print("Json Error");
     }
-    
+
     doc.garbageCollect();
     return status;
 }
@@ -388,16 +387,18 @@ int DeSoLib::updateLastNumPostsForPublicKey(const char *PublicKeysBase58Check, i
 {
     int status = 0;
     static char postData[100];
-    long mem=ESP.getMaxAllocHeap() / 2 - 5000;
-    //Serial.printf("Free Memory:%ld Bytes\n",mem);
+    long mem = ESP.getMaxAllocHeap() / 2 - 5000;
+    // Serial.printf("Free Memory:%ld Bytes\n",mem);
     DynamicJsonDocument doc(mem);
     doc["PublicKeyBase58Check"] = PublicKeysBase58Check;
     doc["NumToFetch"] = NumToFetch;
     serializeJson(doc, postData);
     doc.clear();
     HTTPClient *https = postRequestNew(RoutePathGetPostsForPublicKey, postData);
-    if(https==NULL) return 0;
+    if (https == NULL)
+        return 0;
     DynamicJsonDocument filter(200);
+    filter["Posts"][0]["Body"] = true;
     filter["Posts"][0]["LikeCount"] = true;
     filter["Posts"][0]["DiamondCount"] = true;
 
@@ -416,10 +417,15 @@ int DeSoLib::updateLastNumPostsForPublicKey(const char *PublicKeysBase58Check, i
         JsonArray arr = doc["Posts"].as<JsonArray>();
         for (JsonVariant value : arr)
         {
-            int likes = value["LikeCount"];
-            int diamonds = value["DiamondCount"];
-            prof->lastNPostLikes = prof->lastNPostLikes + likes;
-            prof->lastNPostDiamonds = prof->lastNPostDiamonds + diamonds;
+            String body = value["Body"];
+            // Serial.println(value["Body"].as<char *>());
+            if (body.length() > 0)//check without reposts
+            {
+                int likes = value["LikeCount"];
+                int diamonds = value["DiamondCount"];
+                prof->lastNPostLikes = prof->lastNPostLikes + likes;
+                prof->lastNPostDiamonds = prof->lastNPostDiamonds + diamonds;
+            }
         }
         status = 1;
     }
@@ -430,8 +436,6 @@ int DeSoLib::updateLastNumPostsForPublicKey(const char *PublicKeysBase58Check, i
     doc.garbageCollect();
     return status;
 }
-
-
 
 const char *DeSoLib::getUserBalance(const char *messagePayload)
 {
@@ -446,7 +450,7 @@ int DeSoLib::updateUsersBalance(const char *PublicKeysBase58Check, Profile *prof
     doc["PublicKeyBase58Check"] = PublicKeysBase58Check;
     serializeJson(doc, postData);
     doc.clear();
-    buff_response = (char*)malloc(MAX_RESPONSE_SIZE);
+    buff_response = (char *)malloc(MAX_RESPONSE_SIZE);
     const char *payload = getUserBalance(postData);
 
     // Using JsonStreamingParser library to extract only needed data and to avoid UTXOs
@@ -522,7 +526,7 @@ int DeSoLib::updatePostsStateless(const char *postHashHex, const char *readerPub
     doc["GetPostsForGlobalWhitelist"] = getPostsForGlobalWhitelist;
     serializeJson(doc, postData);
     doc.clear();
-    buff_response = (char*)malloc(MAX_RESPONSE_SIZE);
+    buff_response = (char *)malloc(MAX_RESPONSE_SIZE);
     const char *payload = getPostsStateless(postData);
     DynamicJsonDocument filter(100);
     filter["PostsFound"][0]["Body"] = true;
@@ -600,7 +604,7 @@ HTTPClient *DeSoLib::updateHodlersForPublicKey(const char *PublicKeyBase58Check,
     doc["FetchAll"] = FetchAll;
     // serializeJsonPretty(doc, Serial);
     serializeJson(doc, postData);
-    //Serial.println(postData);
+    // Serial.println(postData);
     doc.clear();
     doc.garbageCollect();
     return postRequestNew(RoutePathGetHodlersForPublicKey, postData);
@@ -641,12 +645,12 @@ int DeSoLib::updateHodleAssetBalance(const char *username, const char *PublicKey
     {
         first = false;
         strcpy(PreLastPublicKey, LastPublicKey);
-        
 
         HTTPClient *https = updateHodlersForPublicKey(PublicKeyBase58Check, username, LastPublicKey, 10, false, true, "", false, prof);
-        if(https==NULL) return 0;
+        if (https == NULL)
+            return 0;
         long heap_len = ESP.getMaxAllocHeap() / 2 - 5000;
-        //Serial.printf("Free memory:%ld\n",heap_len);
+        // Serial.printf("Free memory:%ld\n",heap_len);
         DynamicJsonDocument doc(heap_len);
         DeserializationError error = deserializeJson(doc, https->getStream(), DeserializationOption::Filter(filter));
         https->end();
@@ -657,10 +661,10 @@ int DeSoLib::updateHodleAssetBalance(const char *username, const char *PublicKey
         if (!error && !doc.isNull() && doc.containsKey("Hodlers"))
         {
             status = 1;
-            
+
             strcpy(LastPublicKey, doc["LastPublicKeyBase58Check"]);
             JsonArray arr = doc["Hodlers"].as<JsonArray>();
-            
+
             for (JsonVariant value : arr)
             {
                 double bal = value["BalanceNanos"].as<double>();
@@ -669,12 +673,12 @@ int DeSoLib::updateHodleAssetBalance(const char *username, const char *PublicKey
                 total_coins /= 1000000000.0;
                 double final_deso_value = pow(total_coins, bonding_curve_pow + 1) - pow((total_coins - bal), bonding_curve_pow + 1);
                 final_deso_value *= bonding_curve_gain / 3.0;
-                #if DEBUG_LOG == true
+#if DEBUG_LOG == true
                 Serial.print(value["ProfileEntryResponse"]["Username"].as<char *>());
                 Serial.print(":");
-                Serial.print((final_deso_value * USDCentsPerBitCloutExchangeRate)/100.0);
-                Serial.printf("(%f)\n",bal);
-                #endif
+                Serial.print((final_deso_value * USDCentsPerBitCloutExchangeRate) / 100.0);
+                Serial.printf("(%f)\n", bal);
+#endif
                 amount += final_deso_value;
                 count++;
             }
@@ -699,19 +703,20 @@ int DeSoLib::updateTopHolders(const char *username, const char *PublicKeyBase58C
     {
         NumToFetch = sizeof(prof->TopHodlersUserNames[0]);
     }
-    //buff_response = (char*)malloc(MAX_RESPONSE_SIZE);
+    // buff_response = (char*)malloc(MAX_RESPONSE_SIZE);
     HTTPClient *https = updateHodlersForPublicKey(PublicKeyBase58Check, "", "", NumToFetch, false, false, "", false, prof);
-    if(https==NULL) return 0;
-    //Serial.println(payload);
+    if (https == NULL)
+        return 0;
+    // Serial.println(payload);
     DynamicJsonDocument filter(300);
     filter["Hodlers"][0]["BalanceNanos"] = true;
     filter["Hodlers"][0]["ProfileEntryResponse"]["Username"] = true;
-    filter["Hodlers"][0]["ProfileEntryResponse"]["PublicKeyBase58Check"]=true;
+    filter["Hodlers"][0]["ProfileEntryResponse"]["PublicKeyBase58Check"] = true;
     // Deserialize the document
     DynamicJsonDocument doc(ESP.getMaxAllocHeap() / 2 - 5000);
     DeserializationError error = deserializeJson(doc, https->getStream(), DeserializationOption::Filter(filter));
     https->end();
-    //free(buff_response);
+    // free(buff_response);
     if (doc.isNull())
     {
         serializeJsonPretty(doc, Serial);

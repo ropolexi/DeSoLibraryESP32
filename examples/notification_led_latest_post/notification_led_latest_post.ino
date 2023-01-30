@@ -157,6 +157,13 @@ void like_led_indicate(int num)
     digitalWrite(LIKE_4_PIN, HIGH);
     digitalWrite(LIKE_5_PIN, HIGH);
     break;
+  default:
+    digitalWrite(LIKE_1_PIN, HIGH);
+    digitalWrite(LIKE_2_PIN, HIGH);
+    digitalWrite(LIKE_3_PIN, HIGH);
+    digitalWrite(LIKE_4_PIN, HIGH);
+    digitalWrite(LIKE_5_PIN, HIGH);
+    break;
   }
 }
 
