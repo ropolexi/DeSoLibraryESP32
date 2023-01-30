@@ -86,18 +86,20 @@ ESP32 Module
 - const char *getHodlersForPublicKey(const char *messagePayload);
 - int updateHodlersForPublicKey(const char *username, const char *PublicKeyBase58Check, int NumToFetch, Profile *prof);
 - void clearTopHodlersUserNames(Profile *prof);
+- const char *getSinglePost(const char *messagePayload);
+- int updateSinglePost(const char *postHashHex, bool fetchParents, int commentOffset, int commentLimit, const char *readerPublicKeyBase58Check,bool addGlobalFeedBool, Post *post);
 - const char *getPostsForPublicKey(const char *messagePayload);
-- int updateLastPostForPublicKey(const char *PublicKeysBase58Check, Profile *prof);
 - int updateLastNumPostsForPublicKey(const char *PublicKeysBase58Check, int NumToFetch, Profile *prof);
 - const char *getUserBalance(const char *messagePayload);
 - int updateUsersBalance(const char *PublicKeysBase58Check, Profile *prof);
 - const char *getPostsStateless(const char *messagePayload);
 - int updatePostsStateless(const char *postHashHex, const char *readerPublicKeyBase58Check, int numToFetch, bool getPostsForGlobalWhitelist, long timePeriod);
-- const char *updateHodlersForPublicKey(const char *PublicKeyBase58Check,
-                                        const char *Username, const char *LastPublicKeyBase58Check, int NumToFetch,
-                                        bool IsDAOCoin, bool FetchHodlings, const char *SortType, bool FetchAll, Profile *prof);
-- int updateHodleAssetBalance(const char *username,const char *PublicKeyBase58Check, Profile *prof);
+- HTTPClient *updateHodlersForPublicKey(const char *PublicKeyBase58Check,
+                                          const char *Username, const char *LastPublicKeyBase58Check, int NumToFetch,
+                                          bool IsDAOCoin, bool FetchHodlings, const char *SortType, bool FetchAll, Profile *prof);
+- int updateHodleAssetBalance(const char *username, const char *PublicKeyBase58Check, Profile *prof);
 - int updateTopHolders(const char *username, const char *PublicKeyBase58Check, int NumToFetch, Profile *prof);
+- HTTPClient *postRequestNew(const char *apiPath, const char *data);
    
 ## Changes
 - (2021-10-1) support old and new api changes due to rebranding.
@@ -107,6 +109,7 @@ ESP32 Module
   - use getUserBalance to get wallet balance and updateHodleAssetBalance to get hodle assets actual value
 - (2022-12-4) Hodling asset balance for all the assets by retrieving 10 assets at a time to avoid memory overflow
 - (2022-12-5) wallet balance json decode using json-streaming-parser to avoid long list of UTXOs (unpend transactions). Now faster decoding for wallet balance.
+- (2023-1-30) Updated functions updateTopHolders, updateHodleAssetBalance and updateLastNumPostsForPublicKey to support large json data 
 ## Dependency Libraries
 ArduinoJson - https://github.com/bblanchon/ArduinoJson
 json-streaming-parser - https://github.com/squix78/json-streaming-parser
