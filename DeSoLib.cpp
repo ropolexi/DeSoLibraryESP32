@@ -389,13 +389,14 @@ int DeSoLib::updateLastNumPostsForPublicKey(const char *PublicKeysBase58Check, i
     int status = 0;
     static char postData[100];
     long mem=ESP.getMaxAllocHeap() / 2 - 5000;
-    Serial.printf("Free Memory:%ld Bytes\n",mem);
+    //Serial.printf("Free Memory:%ld Bytes\n",mem);
     DynamicJsonDocument doc(mem);
     doc["PublicKeyBase58Check"] = PublicKeysBase58Check;
     doc["NumToFetch"] = NumToFetch;
     serializeJson(doc, postData);
     doc.clear();
     HTTPClient *https = postRequestNew(RoutePathGetPostsForPublicKey, postData);
+    if(https==NULL) return 0;
     DynamicJsonDocument filter(200);
     filter["Posts"][0]["LikeCount"] = true;
     filter["Posts"][0]["DiamondCount"] = true;
@@ -579,14 +580,12 @@ int DeSoLib::updatePostsStateless(const char *postHashHex, const char *readerPub
  * SortType - "","coin_balance","wealth"
  */
 
-const char *DeSoLib::updateHodlersForPublicKey(const char *PublicKeyBase58Check,
+HTTPClient *DeSoLib::updateHodlersForPublicKey(const char *PublicKeyBase58Check,
                                                const char *Username, const char *LastPublicKeyBase58Check, int NumToFetch,
                                                bool IsDAOCoin, bool FetchHodlings, const char *SortType, bool FetchAll, Profile *prof)
 {
-
-    int status = 0;
-    static char postData[300];
-    DynamicJsonDocument doc(ESP.getMaxAllocHeap() / 2 - 5000);
+    static char postData[500];
+    DynamicJsonDocument doc(500);
     if (strlen(PublicKeyBase58Check) > 1)
         doc["PublicKeyBase58Check"] = PublicKeyBase58Check;
     if (strlen(Username) > 1)
@@ -601,9 +600,10 @@ const char *DeSoLib::updateHodlersForPublicKey(const char *PublicKeyBase58Check,
     doc["FetchAll"] = FetchAll;
     // serializeJsonPretty(doc, Serial);
     serializeJson(doc, postData);
+    //Serial.println(postData);
     doc.clear();
     doc.garbageCollect();
-    return getHodlersForPublicKey(postData);
+    return postRequestNew(RoutePathGetHodlersForPublicKey, postData);
 }
 
 /**
@@ -627,7 +627,7 @@ int DeSoLib::updateHodleAssetBalance(const char *username, const char *PublicKey
     char LastPublicKey[60];
     int count = 0;
     double amount = 0;
-    //memset(LastPublicKey, 0, sizeof(LastPublicKey));
+    memset(LastPublicKey, 0, sizeof(LastPublicKey));
     DynamicJsonDocument filter(300);
     bool first = true;
 
@@ -640,20 +640,20 @@ int DeSoLib::updateHodleAssetBalance(const char *username, const char *PublicKey
     while (first || strlen(LastPublicKey) > 1)
     {
         first = false;
-        const char *payload;
         strcpy(PreLastPublicKey, LastPublicKey);
-        buff_response = (char*)malloc(MAX_RESPONSE_SIZE);
-        payload = updateHodlersForPublicKey(PublicKeyBase58Check, username, LastPublicKey, 10, false, true, "", false, prof);
-        //Serial.println(payload);
+        
+
+        HTTPClient *https = updateHodlersForPublicKey(PublicKeyBase58Check, username, LastPublicKey, 10, false, true, "", false, prof);
+        if(https==NULL) return 0;
         long heap_len = ESP.getMaxAllocHeap() / 2 - 5000;
+        //Serial.printf("Free memory:%ld\n",heap_len);
         DynamicJsonDocument doc(heap_len);
-        DeserializationError error = deserializeJson(doc, payload, DeserializationOption::Filter(filter));
-        free(buff_response);
+        DeserializationError error = deserializeJson(doc, https->getStream(), DeserializationOption::Filter(filter));
+        https->end();
         if (doc.isNull())
         {
             serializeJsonPretty(doc, Serial);
         }
-        //serializeJsonPretty(doc, Serial);
         if (!error && !doc.isNull() && doc.containsKey("Hodlers"))
         {
             status = 1;
@@ -694,14 +694,14 @@ int DeSoLib::updateHodleAssetBalance(const char *username, const char *PublicKey
 
 int DeSoLib::updateTopHolders(const char *username, const char *PublicKeyBase58Check, int NumToFetch, Profile *prof)
 {
-
     int status = 0;
     if (NumToFetch > sizeof(prof->TopHodlersUserNames[0]))
     {
         NumToFetch = sizeof(prof->TopHodlersUserNames[0]);
     }
-    buff_response = (char*)malloc(MAX_RESPONSE_SIZE);
-    const char *payload = updateHodlersForPublicKey(PublicKeyBase58Check, "", "", NumToFetch, false, false, "", false, prof);
+    //buff_response = (char*)malloc(MAX_RESPONSE_SIZE);
+    HTTPClient *https = updateHodlersForPublicKey(PublicKeyBase58Check, "", "", NumToFetch, false, false, "", false, prof);
+    if(https==NULL) return 0;
     //Serial.println(payload);
     DynamicJsonDocument filter(300);
     filter["Hodlers"][0]["BalanceNanos"] = true;
@@ -709,8 +709,9 @@ int DeSoLib::updateTopHolders(const char *username, const char *PublicKeyBase58C
     filter["Hodlers"][0]["ProfileEntryResponse"]["PublicKeyBase58Check"]=true;
     // Deserialize the document
     DynamicJsonDocument doc(ESP.getMaxAllocHeap() / 2 - 5000);
-    DeserializationError error = deserializeJson(doc, payload, DeserializationOption::Filter(filter));
-    free(buff_response);
+    DeserializationError error = deserializeJson(doc, https->getStream(), DeserializationOption::Filter(filter));
+    https->end();
+    //free(buff_response);
     if (doc.isNull())
     {
         serializeJsonPretty(doc, Serial);
