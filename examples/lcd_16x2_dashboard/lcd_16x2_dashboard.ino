@@ -35,14 +35,8 @@ void setup()
     delay(1000);
     Serial.print(".");
   }
-  deso.addNodePath("https://node.deso.org", "");
-  deso.addNodePath("https://love4src.com", "");
-  deso.addNodePath("https://desocialworld.com", "");
-  deso.addNodePath("https://supernovas.app", "");
-  deso.addNodePath("https://diamondapp.com", "");
-  deso.addNodePath("https://node.post2earndao.com", "");
-  deso.addNodePath("https://web3social.network", "");
-  deso.addNodePath("https://beyond.restartu.org", "");
+  deso.addNodePath("https://diamondapp.com", ISRG_Root_caRootCert);
+  deso.addNodePath("https://node.deso.org", GTS_Root_caRootCert);
 
   deso.selectDefaultNode(0);
   lcd.clear();
