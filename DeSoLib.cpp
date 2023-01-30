@@ -535,16 +535,17 @@ int DeSoLib::updatePostsStateless(const char *postHashHex, const char *readerPub
     doc["GetPostsForGlobalWhitelist"] = getPostsForGlobalWhitelist;
     serializeJson(doc, postData);
     doc.clear();
-    buff_response = (char *)malloc(MAX_RESPONSE_SIZE);
-    const char *payload = getPostsStateless(postData);
+    HTTPClient *https = postRequestNew(RoutePathGetPostsStateless, postData);
+    if (https == NULL)
+        return 0;
     DynamicJsonDocument filter(100);
     filter["PostsFound"][0]["Body"] = true;
     filter["PostsFound"][0]["TimestampNanos"] = true;
     filter["PostsFound"][0]["ProfileEntryResponse"]["Username"] = true;
 
     // Deserialize the document
-    DeserializationError error = deserializeJson(doc, payload, DeserializationOption::Filter(filter));
-    free(buff_response);
+    DeserializationError error = deserializeJson(doc, https->getStream(), DeserializationOption::Filter(filter));
+    https->end();
     if (doc.isNull())
     {
         serializeJsonPretty(doc, Serial);
