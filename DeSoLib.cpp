@@ -260,10 +260,20 @@ int DeSoLib::updateSingleProfile(const char *username, const char *PublicKeyBase
 
     serializeJson(doc, postData);
     doc.clear();
-    buff_response = (char *)malloc(MAX_RESPONSE_SIZE);
-    const char *payload = getSingleProfile(postData);
-    DeserializationError error = deserializeJson(doc, payload);
-    free(buff_response);
+    HTTPClient *https = postRequestNew(RoutePathGetSingleProfile, postData);
+    if (https == NULL)
+        return 0;
+    DynamicJsonDocument filter(300);
+    filter["Profile"]["Username"] = true;
+    filter["Profile"]["CoinPriceBitCloutNanos"] = true;
+    filter["Profile"]["CoinPriceDeSoNanos"]=true;
+    filter["Profile"]["CoinEntry"]["CoinsInCirculationNanos"] = true;
+    filter["Profile"]["PublicKeyBase58Check"] = true;
+
+    // Deserialize the document
+    DeserializationError error = deserializeJson(doc, https->getStream(), DeserializationOption::Filter(filter));
+    https->end();
+
     if (doc.isNull())
     {
         serializeJsonPretty(doc, Serial);
