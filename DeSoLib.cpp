@@ -351,11 +351,11 @@ int DeSoLib::updateSinglePost(const char *postHashHex, bool fetchParents, int co
     doc["CommentLimit"] = commentLimit;
     strlen(readerPublicKeyBase58Check) > 0 ? doc["ReaderPublicKeyBase58Check"] = readerPublicKeyBase58Check : doc["ReaderPublicKeyBase58Check"] = "";
     doc["AddGlobalFeedBool"] = addGlobalFeedBool;
-
     serializeJson(doc, postData);
     doc.clear();
-    buff_response = (char *)malloc(MAX_RESPONSE_SIZE);
-    const char *payload = getSinglePost(postData);
+    HTTPClient *https = postRequestNew(RoutePathGetSinglePost, postData);
+    if (https == NULL)
+        return 0;
     // Serial.println(payload);
     DynamicJsonDocument filter(200);
     filter["PostFound"]["PostHashHex"] = true;
@@ -366,9 +366,8 @@ int DeSoLib::updateSinglePost(const char *postHashHex, bool fetchParents, int co
     filter["PostFound"]["QuoteRepostCount"] = true;
     filter["PostFound"]["PostEntryReaderState"]["LikedByReader"] = true;
 
-    // Deserialize the document
-    DeserializationError error = deserializeJson(doc, payload, DeserializationOption::Filter(filter));
-    free(buff_response);
+    DeserializationError error = deserializeJson(doc, https->getStream(), DeserializationOption::Filter(filter));
+    https->end();
     if (doc.isNull())
     {
         serializeJsonPretty(doc, Serial);
