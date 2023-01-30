@@ -145,6 +145,52 @@ const char *DeSoLib::postRequest(const char *apiPath, const char *data)
     return buff_ptr;
 }
 
+HTTPClient *DeSoLib::postRequestNew(const char *apiPath, const char *data)
+{
+    static HTTPClient https;
+    https.useHTTP10(true);
+    if (strcmp(nodePaths[selectedNodeIndex].caRootCert, ""))
+    {
+        espClientSecure.setCACert(nodePaths[selectedNodeIndex].caRootCert);
+    }
+    else
+    {
+        Serial.println("Selecting insecure method,not checking site authenticity");
+        espClientSecure.setInsecure();
+    }
+    snprintf(buff_small_1, sizeof(buff_small_1), "%s%s", nodePaths[selectedNodeIndex].url, apiPath);
+
+    if (https.begin(espClientSecure, buff_small_1))
+    {
+        https.addHeader("User-Agent", "Mozilla/5.0");
+        https.addHeader("Accept", "application/json");
+        https.addHeader("Content-Type", "application/json");
+        int httpCode = https.POST((uint8_t *)data, strlen(data));
+        if (httpCode > 0)
+        {
+            if (httpCode == HTTP_CODE_OK)
+            {
+                return &https;
+               
+            }
+            else
+            {
+                debug_print(httpCode);
+            }
+        }
+        else
+        {
+            debug_print("http error ");
+        }
+    }
+    else
+    {
+        debug_print("server error ");
+    }
+
+    return NULL;
+}
+
 const char *DeSoLib::getNodeHealthCheck()
 {
     return getRequest(RoutePathHealthCheck);
@@ -342,21 +388,21 @@ int DeSoLib::updateLastNumPostsForPublicKey(const char *PublicKeysBase58Check, i
 {
     int status = 0;
     static char postData[100];
-    DynamicJsonDocument doc(ESP.getMaxAllocHeap() / 2 - 5000);
+    long mem=ESP.getMaxAllocHeap() / 2 - 5000;
+    Serial.printf("Free Memory:%ld Bytes\n",mem);
+    DynamicJsonDocument doc(mem);
     doc["PublicKeyBase58Check"] = PublicKeysBase58Check;
     doc["NumToFetch"] = NumToFetch;
     serializeJson(doc, postData);
     doc.clear();
-    buff_response = (char*)malloc(MAX_RESPONSE_SIZE);
-    const char *payload = getPostsForPublicKey(postData);
-    //Serial.println(payload);
+    HTTPClient *https = postRequestNew(RoutePathGetPostsForPublicKey, postData);
     DynamicJsonDocument filter(200);
     filter["Posts"][0]["LikeCount"] = true;
     filter["Posts"][0]["DiamondCount"] = true;
 
     // Deserialize the document
-    DeserializationError error = deserializeJson(doc, payload, DeserializationOption::Filter(filter));
-    free(buff_response);
+    DeserializationError error = deserializeJson(doc, https->getStream(), DeserializationOption::Filter(filter));
+    https->end();
     if (doc.isNull())
     {
         serializeJsonPretty(doc, Serial);
@@ -383,6 +429,8 @@ int DeSoLib::updateLastNumPostsForPublicKey(const char *PublicKeysBase58Check, i
     doc.garbageCollect();
     return status;
 }
+
+
 
 const char *DeSoLib::getUserBalance(const char *messagePayload)
 {
@@ -579,7 +627,7 @@ int DeSoLib::updateHodleAssetBalance(const char *username, const char *PublicKey
     char LastPublicKey[60];
     int count = 0;
     double amount = 0;
-    memset(LastPublicKey, 0, sizeof(LastPublicKey));
+    //memset(LastPublicKey, 0, sizeof(LastPublicKey));
     DynamicJsonDocument filter(300);
     bool first = true;
 

@@ -101,6 +101,7 @@ public:
                                           bool IsDAOCoin, bool FetchHodlings, const char *SortType, bool FetchAll, Profile *prof);
     int updateHodleAssetBalance(const char *username, const char *PublicKeyBase58Check, Profile *prof);
     int updateTopHolders(const char *username, const char *PublicKeyBase58Check, int NumToFetch, Profile *prof);
+    HTTPClient *postRequestNew(const char *apiPath, const char *data);
     //const char *getSinglePost(const char *messagePayload);
     //const char *updateSinglePost(const char *PostHashHex, bool FetchParents, int CommentOffset, int CommentLimit, const char *ReaderPublicKeyBase58Check,Profile *prof);
     //const char *getComments(const char *PostHashHex,int CommentOffset,int CommentLimit);
