@@ -562,10 +562,7 @@ void loop()
           balance_led_status = true;
         }
       }
-
-      digitalWrite(BALANCE_PIN, LOW);
       timer2 = millis();
-      // digitalWrite(LIKE_PIN, LOW);
     }
     if (balance_led_status) // if balance led on, off after 2 seconds
     {
