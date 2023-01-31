@@ -1,7 +1,7 @@
 #include <Arduino.h>
 #include "DeSoLib.h"
 #include <WiFi.h>
-#include "cert.h"
+
 #define LIKE_1_PIN 4
 #define LIKE_2_PIN 16
 #define LIKE_3_PIN 17
@@ -211,7 +211,8 @@ void setup()
     delay(1000);
     Serial.print(".");
   }
-  deso.addNodePath("https://diamondapp.com", ISRG_Root_caRootCert);
+  deso.addNodePath("https://desocialworld.com", ISRG_Root_caRootCert);
+  deso.addNodePath("https://diamondapp.com",Baltimore_Root_caRootCert );
   deso.addNodePath("https://node.deso.org", GTS_Root_caRootCert);
 
   deso.selectDefaultNode(0);

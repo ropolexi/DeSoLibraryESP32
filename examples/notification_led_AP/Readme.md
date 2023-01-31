@@ -32,7 +32,6 @@ username_default and post_hash_default are default values, after changing the se
 // Fill in the username
 const char username_default[] = "ropolexi";
 const char post_hash_default[]= "592e078bf7fceda497577593cbafd52af7a34f08c37435b155169cb07a560da3";
-char username[20];
 // Fill in the ssid and password
 const char ssid[] = "";
 const char wifi_pass[] = "";

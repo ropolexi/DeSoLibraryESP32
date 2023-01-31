@@ -4,7 +4,6 @@
 #include <WiFi.h>
 #include "time.h"
 #include "sntp.h"
-#include "cert.h"
 
 #define UPDATE_INTERVAL 60
 // Fill in timezone in seconds
@@ -92,8 +91,8 @@ void setup()
     delay(1000);
   }
 
-  deso.addNodePath("https://node.deso.org",  GTS_Root_caRootCert);
-  deso.addNodePath("https://diamondapp.com", ISRG_Root_caRootCert);
+  deso.addNodePath("https://diamondapp.com",Baltimore_Root_caRootCert );
+  deso.addNodePath("https://node.deso.org", GTS_Root_caRootCert);
   deso.addNodePath("https://desocialworld.com", ISRG_Root_caRootCert);
   deso.selectDefaultNode(0);
 }

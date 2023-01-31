@@ -35,7 +35,8 @@ void setup()
     delay(1000);
     Serial.print(".");
   }
-  deso.addNodePath("https://diamondapp.com", ISRG_Root_caRootCert);
+  deso.addNodePath("https://desocialworld.com", ISRG_Root_caRootCert);
+  deso.addNodePath("https://diamondapp.com",Baltimore_Root_caRootCert );
   deso.addNodePath("https://node.deso.org", GTS_Root_caRootCert);
 
   deso.selectDefaultNode(0);

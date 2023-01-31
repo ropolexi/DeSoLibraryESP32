@@ -4,7 +4,8 @@
 #include <WiFi.h>
 #include <WebServer.h>
 #include <ESPmDNS.h>
-#include "cert.h"
+#include "ArduinoJson.h"
+
 #define LIKE_1_PIN 4
 #define LIKE_2_PIN 16
 #define LIKE_3_PIN 17
@@ -24,10 +25,12 @@
 // Fill in the username
 const char username_default[] = "ropolexi";
 const char post_hash_default[]= "592e078bf7fceda497577593cbafd52af7a34f08c37435b155169cb07a560da3";
-char username[20];
+
 // Fill in the ssid and password
 const char ssid[] = "";
 const char wifi_pass[] = "";
+
+char username[20];
 
 WebServer server(80);
 DeSoLib deso;
@@ -46,54 +49,100 @@ bool username_updated=false;
 const char main_page[] PROGMEM = R"(
 <html>
 <title>
-DeSo Dashbaord
+    DeSo Dashbaord
 </title>
-<head> 
- <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
-<style></style>
+
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style></style>
 </head>
+
 <body bgcolor="#2CA2E1" style="font-family:arial">
     <h1>ESP32 DESO Dashboard Settings</h1>
-<h2>Profile Settings</h2>
-<p>Type the username without @ </p>
+    <h2>Profile Settings</h2>
+    <p>Type the username without @ </p>
     <form method="POST" action="/settings/">
         <table width="100%">
-            <col width="20%"><col width="80%">
-        <tr><td>Username</td><td><input type="text" name="username" id="username" value="" maxlength="20"></td></tr>
-        <tr><td>Read Post</td><td>
-        <select class="select" name="post_type">
-            <option value="latest">Latest</option>
-            <option value="fixed">Fixed</option>     
-        </select>
-        <tr class="num"><td>Number of posts</td><td><input type="number" name="num" value="" maxlength="3"></td></tr>
-        <tr class="hash"><td>Post hash</td><td><input type="text" name="post_hash" value="" maxlength="65" size="65"></td></tr>
-        </td></tr>
-        <tr><td></td><td><input type="submit" value="Submit"></td></tr>
+            <col width="20%">
+            <col width="80%">
+            <tr>
+                <td>Username</td>
+                <td><input type="text" name="username" id="username" value="" maxlength="20"></td>
+            </tr>
+            <tr>
+                <td>Read Post</td>
+                <td>
+                    <select class="select" name="post_type" id="post_type">
+                        <option value="latest">Latest</option>
+                        <option value="fixed">Fixed</option>
+                    </select>
+            <tr class="num">
+                <td>Number of posts</td>
+                <td><input type="number" name="num" id="num" value="" maxlength="3"></td>
+            </tr>
+            <tr class="hash">
+                <td>Post hash</td>
+                <td><input type="text" name="post_hash" id="post_hash" value="" maxlength="65" size="65"></td>
+            </tr>
+            </td>
+            </tr>
+            <tr>
+                <td></td>
+                <td><input type="submit" value="Submit"></td>
+            </tr>
         </table>
-    </form>  
+    </form>
     <script>
         const select1 = document.getElementsByClassName("select")[0]
-        const num=document.getElementsByClassName("num")[0]
-        const hash=document.getElementsByClassName("hash")[0]
-        if(select1.options[select1.selectedIndex].value=="latest"){
-                num.style.display="table-row"
-                hash.style.display="none"
-        }else if(select1.options[select1.selectedIndex]=="fixed"){
-            num.style.display="none"
-            hash.style.display="table-row"
+        const num = document.getElementsByClassName("num")[0]
+        const hash = document.getElementsByClassName("hash")[0]
+        if (select1.options[select1.selectedIndex].value == "latest") {
+            num.style.display = "table-row"
+            hash.style.display = "none"
+        } else if (select1.options[select1.selectedIndex] == "fixed") {
+            num.style.display = "none"
+            hash.style.display = "table-row"
         }
         select1.addEventListener('change', function handleChange(event) {
-            if(event.target.value=="latest"){
-                num.style.display="table-row"
-                hash.style.display="none"
-            }else if(event.target.value=="fixed"){
-                num.style.display="none"
-                hash.style.display="table-row"
+            if (event.target.value == "latest") {
+                num.style.display = "table-row"
+                hash.style.display = "none"
+            } else if (event.target.value == "fixed") {
+                num.style.display = "none"
+                hash.style.display = "table-row"
             }
-        
-        })  
+
+        })
+
+        function loadDoc() {
+            const username_item = document.getElementById("username")
+            const type_item = document.getElementById("post_type")
+            const num_item = document.getElementById("num")
+            const hash_item = document.getElementById("post_hash")
+
+            const xhttp = new XMLHttpRequest();
+            xhttp.onload = function () {
+                var jsonObj = JSON.parse(this.responseText);
+                if (jsonObj.type == 0) {
+                    type_item.value = "latest"
+                    num.style.display = "table-row"
+                    hash.style.display = "none"
+                } else if (jsonObj.type == 1) {
+                    type_item.value = "fixed"
+                    num.style.display = "none"
+                    hash.style.display = "table-row"
+                }
+                num_item.value = jsonObj.num;
+                hash_item.value = jsonObj.hash;
+                username_item.value = jsonObj.username;
+            }
+            xhttp.open("GET", "/info/", true);
+            xhttp.send();
+        }
+        loadDoc();
     </script>
 </body>
+
 </html>
 )";
 void nextServer()
@@ -288,6 +337,19 @@ void settings()
 
 }
 
+void info(){
+  DynamicJsonDocument doc(200);
+  char postData[200];
+  doc["type"]=post_type;
+  doc["hash"]=post_hash;
+  doc["num"]=num_posts;
+  doc["username"]=username;
+
+  serializeJson(doc, postData);
+  //Serial.println(postData);
+  server.send(200, "application/json", postData);
+}
+
 void default_settings()
 {
   //strncpy(username, username_default, sizeof(username));
@@ -353,11 +415,12 @@ void setup()
   server.on("/", []()
             { server.send(200, "text/html", main_page); });
   server.on("/settings/", settings);
+  server.on("/info/", info);
   server.begin();
 
   default_settings();
-
-  deso.addNodePath("https://diamondapp.com", ISRG_Root_caRootCert);
+  deso.addNodePath("https://desocialworld.com", ISRG_Root_caRootCert);
+  deso.addNodePath("https://diamondapp.com",Baltimore_Root_caRootCert );
   deso.addNodePath("https://node.deso.org", GTS_Root_caRootCert);
 
   deso.selectDefaultNode(0);

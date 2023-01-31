@@ -4,6 +4,7 @@
 #include <HTTPClient.h>
 #include "WiFi.h"
 #include <stdlib.h>
+#include "cert.h"
 
 #define DEBUG_LOG true
 #define MAX_RESPONSE_SIZE 30000
