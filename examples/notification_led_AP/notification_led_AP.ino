@@ -25,12 +25,10 @@
 // Fill in the username
 const char username_default[] = "ropolexi";
 const char post_hash_default[]= "592e078bf7fceda497577593cbafd52af7a34f08c37435b155169cb07a560da3";
-
+char username[20];
 // Fill in the ssid and password
 const char ssid[] = "";
 const char wifi_pass[] = "";
-
-char username[20];
 
 WebServer server(80);
 DeSoLib deso;
@@ -46,21 +44,19 @@ int post_type = 0;
 int num_posts = 0;
 char post_hash[65];
 bool username_updated=false;
+bool force_update=false;
 const char main_page[] PROGMEM = R"(
 <html>
 <title>
     DeSo Dashbaord
 </title>
-
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style></style>
 </head>
-
 <body bgcolor="#2CA2E1" style="font-family:arial">
     <h1>ESP32 DESO Dashboard Settings</h1>
-    <h2>Profile Settings</h2>
-    <p>Type the username without @ </p>
+    <h2>Settings</h2>
     <form method="POST" action="/settings/">
         <table width="100%">
             <col width="20%">
@@ -90,6 +86,34 @@ const char main_page[] PROGMEM = R"(
                 <td></td>
                 <td><input type="submit" value="Submit"></td>
             </tr>
+            <tr>
+                <td><b>Results will update, Please wait...</b></td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>Node</td>
+                <td>
+                    <div id="node"></div>
+                </td>
+            </tr>
+            <tr>
+                <td>Diamonds</td>
+                <td>
+                    <div id="diamonds"></div>
+                </td>
+            </tr>
+            <tr>
+                <td>Likes</td>
+                <td>
+                    <div id="likes"></div>
+                </td>
+            </tr>
+            <tr>
+                <td>Balance (DESO)</td>
+                <td>
+                    <div id="balance"></div>
+                </td>
+            </tr>
         </table>
     </form>
     <script>
@@ -111,15 +135,29 @@ const char main_page[] PROGMEM = R"(
                 num.style.display = "none"
                 hash.style.display = "table-row"
             }
-
         })
+        function update_data() {
+            const node = document.getElementById("node")
+            const diamonds = document.getElementById("diamonds")
+            const likes = document.getElementById("likes")
+            const balance = document.getElementById("balance")
+            const xhttp = new XMLHttpRequest();
+            xhttp.onload = function () {
+                var jsonObj = JSON.parse(this.responseText);
+                node.innerHTML = jsonObj.node
+                diamonds.innerHTML = jsonObj.diamonds
+                likes.innerHTML = jsonObj.likes
+                balance.innerHTML = jsonObj.balance
+            }
+            xhttp.open("GET", "/info/", true);
+            xhttp.send();
+        }
 
         function loadDoc() {
             const username_item = document.getElementById("username")
             const type_item = document.getElementById("post_type")
             const num_item = document.getElementById("num")
             const hash_item = document.getElementById("post_hash")
-
             const xhttp = new XMLHttpRequest();
             xhttp.onload = function () {
                 var jsonObj = JSON.parse(this.responseText);
@@ -132,17 +170,17 @@ const char main_page[] PROGMEM = R"(
                     num.style.display = "none"
                     hash.style.display = "table-row"
                 }
-                num_item.value = jsonObj.num;
-                hash_item.value = jsonObj.hash;
-                username_item.value = jsonObj.username;
+                num_item.value = jsonObj.num
+                hash_item.value = jsonObj.hash
+                username_item.value = jsonObj.username
             }
             xhttp.open("GET", "/info/", true);
             xhttp.send();
         }
         loadDoc();
+        setInterval(update_data, 2000)
     </script>
 </body>
-
 </html>
 )";
 void nextServer()
@@ -333,17 +371,21 @@ void settings()
       
     }
   }
+  force_update=true;
   server.send(200, "text/html", main_page);
-
 }
 
 void info(){
-  DynamicJsonDocument doc(200);
-  char postData[200];
+  DynamicJsonDocument doc(300);
+  char postData[300];
   doc["type"]=post_type;
   doc["hash"]=post_hash;
   doc["num"]=num_posts;
   doc["username"]=username;
+  doc["likes"]=like_count;
+  doc["diamonds"]=diamond_count;
+  doc["node"]=deso.getSelectedNodeUrl();
+  doc["balance"]=balance/1000000000.0;
 
   serializeJson(doc, postData);
   //Serial.println(postData);
@@ -444,8 +486,9 @@ void loop()
   static bool balance_led_status = false;
   if (WiFi.isConnected())
   {
-    if (millis() - timer1 > 30000UL)//update period is every 30 seconds
+    if (millis() - timer1 > 30000UL || force_update)//update period is every 30 seconds
     {
+      force_update=false;
       timer1 = millis();
       Serial.println("Updating");
       digitalWrite(LED_BUILTIN, HIGH);
