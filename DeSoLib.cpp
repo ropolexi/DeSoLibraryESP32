@@ -37,6 +37,20 @@ bool DeSoLib::getSelectedNodeStatus()
     return nodePaths[selectedNodeIndex].status;
 }
 
+void DeSoLib::addFeed(const char *username, const char *body)
+{
+    Feed feed;
+    strncpy(feed.username, username, sizeof(feed.username));
+    strncpy(feed.body, body, sizeof(feed.body));
+    feeds.push_back(feed);
+}
+
+void DeSoLib::getFeed(int index, char *username, char *body)
+{
+    strncpy(username, feeds[index].username, sizeof(feeds[index].username));
+    strncpy(body, feeds[index].body, sizeof(feeds[index].body));
+}
+
 const char *DeSoLib::getRequest(const char *apiPath)
 {
     HTTPClient https;
@@ -266,7 +280,7 @@ int DeSoLib::updateSingleProfile(const char *username, const char *PublicKeyBase
     DynamicJsonDocument filter(300);
     filter["Profile"]["Username"] = true;
     filter["Profile"]["CoinPriceBitCloutNanos"] = true;
-    filter["Profile"]["CoinPriceDeSoNanos"]=true;
+    filter["Profile"]["CoinPriceDeSoNanos"] = true;
     filter["Profile"]["CoinEntry"]["CoinsInCirculationNanos"] = true;
     filter["Profile"]["PublicKeyBase58Check"] = true;
 
@@ -428,7 +442,7 @@ int DeSoLib::updateLastNumPostsForPublicKey(const char *PublicKeysBase58Check, i
         {
             String body = value["Body"];
             // Serial.println(value["Body"].as<char *>());
-            if (body.length() > 0)//check without reposts
+            if (body.length() > 0) // check without reposts
             {
                 int likes = value["LikeCount"];
                 int diamonds = value["DiamondCount"];
@@ -566,6 +580,73 @@ int DeSoLib::updatePostsStateless(const char *postHashHex, const char *readerPub
                 if (time(nullptr) - ts < timePeriod && time(nullptr) - ts > 0)
                 {
                     Serial.printf("\n[%s](%s) %s\n", genLocaltime(ts), username.c_str(), body.c_str());
+                }
+            }
+        }
+
+        status = 1;
+    }
+    else
+    {
+        debug_print("Json Error");
+    }
+    doc.garbageCollect();
+    return status;
+}
+
+int DeSoLib::updatePostsStatelessSave(const char *postHashHex, const char *readerPublicKeyBase58Check,bool getPostsForFollowFeed, int numToFetch, bool getPostsForGlobalWhitelist, int postsByDESOMinutesLookback)
+{
+    int status = 0;
+    char postData[1024];
+    DynamicJsonDocument doc(ESP.getMaxAllocHeap() / 2 - 5000);
+    if (strlen(postHashHex) > 0)
+    {
+        Serial.println("Has postHashHex");
+        doc["PostHashHex"] = postHashHex;
+    }
+    doc["ReaderPublicKeyBase58Check"] = readerPublicKeyBase58Check;
+    doc["OrderBy"] = "";
+    doc["PostContent"] = "";
+    doc["FetchSubcomments"] = false;
+    doc["GetPostsForFollowFeed"] = getPostsForFollowFeed;
+    doc["GetPostsByDESO"] = false;
+    doc["NumToFetch"] = numToFetch;
+    doc["MediaRequired"] = false;
+    doc["PostsByDESOMinutesLookback"] = 0;
+
+    doc["GetPostsForGlobalWhitelist"] = getPostsForGlobalWhitelist;
+    serializeJson(doc, postData);
+    doc.clear();
+    HTTPClient *https = postRequestNew(RoutePathGetPostsStateless, postData);
+    if (https == NULL)
+        return 0;
+    DynamicJsonDocument filter(100);
+    filter["PostsFound"][0]["Body"] = true;
+    filter["PostsFound"][0]["TimestampNanos"] = true;
+    filter["PostsFound"][0]["ProfileEntryResponse"]["Username"] = true;
+
+    // Deserialize the document
+    DeserializationError error = deserializeJson(doc, https->getStream(), DeserializationOption::Filter(filter));
+    https->end();
+    if (doc.isNull())
+    {
+        serializeJsonPretty(doc, Serial);
+    }
+    if (!error)
+    {
+        JsonArray arr = doc["PostsFound"].as<JsonArray>();
+        for (JsonVariant value : arr)
+        {
+            Feed feed;
+            strncpy(feed.username,value["ProfileEntryResponse"]["Username"].as<char *>(),sizeof(feed.username));
+            strncpy(feed.body,value["Body"].as<char *>(),sizeof(feed.body));
+
+            if (strlen(feed.body) > 1)
+            {
+                addFeed(feed.username, feed.body);
+                if (feeds.size() > numToFetch)
+                {
+                    feeds.erase(feeds.begin());
                 }
             }
         }

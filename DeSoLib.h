@@ -46,6 +46,12 @@ public:
         int QuoteRepostCount=0;
         bool LikedByReader=false;
     };
+
+    struct Feed
+    {
+        char username[16];
+        char body[48];//for lcd display limit
+    };
     struct Profile
     {
         char PublicKeyBase58Check[56];
@@ -63,6 +69,9 @@ public:
         int lastNPostLikes = 0;
         int lastNPostDiamonds = 0;
     };
+
+    std::vector<Feed> feeds;
+
     char buff_small_1[200];
     char buff_small_2[200];
     //char buff_large[1024]; // heavy usage on web response
@@ -77,6 +86,7 @@ public:
     void selectDefaultNode(int index);
     char *getSelectedNodeUrl();
     bool getSelectedNodeStatus();
+    void addFeed(const char *username, const char *body);
     const char *getRequest(const char *apiPath);
     const char *postRequest(const char *apiPath, const char *data);
     const char *getNodeHealthCheck();
@@ -103,6 +113,8 @@ public:
     int updateHodleAssetBalance(const char *username, const char *PublicKeyBase58Check, Profile *prof);
     int updateTopHolders(const char *username, const char *PublicKeyBase58Check, int NumToFetch, Profile *prof);
     HTTPClient *postRequestNew(const char *apiPath, const char *data);
+    int updatePostsStatelessSave(const char *postHashHex, const char *readerPublicKeyBase58Check,bool getPostsForFollowFeed, int numToFetch, bool getPostsForGlobalWhitelist, int postsByDESOMinutesLookback);
+    void getFeed(int index,char *username,char *body);
     //const char *getSinglePost(const char *messagePayload);
     //const char *updateSinglePost(const char *PostHashHex, bool FetchParents, int CommentOffset, int CommentLimit, const char *ReaderPublicKeyBase58Check,Profile *prof);
     //const char *getComments(const char *PostHashHex,int CommentOffset,int CommentLimit);
@@ -110,6 +122,7 @@ public:
 
 private:
     std::vector<Node> nodePaths;
+    
     double bonding_curve_gain = 0.003;
     int bonding_curve_pow = 2;
 };
