@@ -594,7 +594,7 @@ int DeSoLib::updatePostsStateless(const char *postHashHex, const char *readerPub
     return status;
 }
 
-int DeSoLib::updatePostsStatelessSave(const char *postHashHex, const char *readerPublicKeyBase58Check,bool getPostsForFollowFeed, int numToFetch, bool getPostsForGlobalWhitelist, int postsByDESOMinutesLookback)
+int DeSoLib::updatePostsStatelessSave(const char *postHashHex, const char *readerPublicKeyBase58Check, bool getPostsForFollowFeed, int numToFetch, bool getPostsForGlobalWhitelist, int postsByDESOMinutesLookback)
 {
     int status = 0;
     char postData[1024];
@@ -612,7 +612,7 @@ int DeSoLib::updatePostsStatelessSave(const char *postHashHex, const char *reade
     doc["GetPostsByDESO"] = false;
     doc["NumToFetch"] = numToFetch;
     doc["MediaRequired"] = false;
-    doc["PostsByDESOMinutesLookback"] = 0;
+    doc["PostsByDESOMinutesLookback"] = postsByDESOMinutesLookback;
 
     doc["GetPostsForGlobalWhitelist"] = getPostsForGlobalWhitelist;
     serializeJson(doc, postData);
@@ -637,13 +637,30 @@ int DeSoLib::updatePostsStatelessSave(const char *postHashHex, const char *reade
         JsonArray arr = doc["PostsFound"].as<JsonArray>();
         for (JsonVariant value : arr)
         {
-            Feed feed;
-            strncpy(feed.username,value["ProfileEntryResponse"]["Username"].as<char *>(),sizeof(feed.username));
-            strncpy(feed.body,value["Body"].as<char *>(),sizeof(feed.body));
-
-            if (strlen(feed.body) > 1)
+            char body[200];
+            char username[17];
+            strncpy(username, value["ProfileEntryResponse"]["Username"].as<char *>(), sizeof(username)-1);
+            strncpy(body, value["Body"].as<char *>(), sizeof(body));
+            if (strlen(body) > 1)
             {
-                addFeed(feed.username, feed.body);
+                Feed feed_filtered;
+                int index = 0;
+                for (int i = 0; i < strlen(body); i++)
+                {
+                    if (body[i] >= 32 && body[i] <= 126)
+                    {
+                        feed_filtered.body[index] = body[i];
+                        index++;
+                        if (index >= sizeof(feed_filtered.body)-1)
+                        {
+                            break;
+                        }
+                    }
+                }
+                feed_filtered.body[index] = '\0';
+                username[sizeof(username)-1]= '\0';
+
+                addFeed(username, feed_filtered.body);
                 if (feeds.size() > numToFetch)
                 {
                     feeds.erase(feeds.begin());

@@ -49,8 +49,8 @@ public:
 
     struct Feed
     {
-        char username[16];
-        char body[48];//for lcd display limit
+        char username[17];
+        char body[180];//for lcd display limit
     };
     struct Profile
     {
