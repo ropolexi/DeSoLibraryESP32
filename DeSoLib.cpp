@@ -744,11 +744,12 @@ int DeSoLib::updateHodleAssetBalance(const char *username, const char *PublicKey
     memset(LastPublicKey, 0, sizeof(LastPublicKey));
     DynamicJsonDocument filter(300);
     bool first = true;
+    int iterations=0;
 
     filter["LastPublicKeyBase58Check"] = true;
     filter["Hodlers"][0]["BalanceNanos"] = true;
     filter["Hodlers"][0]["ProfileEntryResponse"]["Username"] = true;
-    filter["Hodlers"][0]["ProfileEntryResponse"]["CoinPriceDeSoNanos"] = true;
+    //filter["Hodlers"][0]["ProfileEntryResponse"]["CoinPriceDeSoNanos"] = true;
     filter["Hodlers"][0]["ProfileEntryResponse"]["CoinEntry"]["CoinsInCirculationNanos"] = true;
 
     while (first || strlen(LastPublicKey) > 1)
@@ -799,6 +800,10 @@ int DeSoLib::updateHodleAssetBalance(const char *username, const char *PublicKey
             debug_print("Json Error");
         }
         doc.garbageCollect();
+        iterations++;
+        if(iterations>MAX_HODLING_ITERATIONS){
+            break;
+        }
     }
     prof->TotalHODLBalanceClout = amount;
     prof->TotalHodleNum = count;
@@ -834,7 +839,15 @@ int DeSoLib::updateTopHolders(const char *username, const char *PublicKeyBase58C
     if (!error)
     {
         JsonArray arr = doc["Hodlers"].as<JsonArray>();
+        //clear previous data
+        for(int i=0;i<TOP_HOLDER_MAX;i++){
+            prof->TopHodlersCoins[i]=0;
+            prof->TopHodlersCoinsPerc[i]=0;
+            memset(prof->TopHodlersUserNames[i],0,sizeof(prof->TopHodlersUserNames[i]));
+            memset(prof->TopHodlersPublicKeyBase58Check[i],0,sizeof(prof->TopHodlersPublicKeyBase58Check[i]));
+        }
         int count = 0;
+
         for (JsonVariant value : arr)
         {
             double coins = value["BalanceNanos"].as<double>();

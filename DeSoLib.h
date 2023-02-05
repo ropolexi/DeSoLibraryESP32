@@ -8,6 +8,9 @@
 
 #define DEBUG_LOG true
 #define MAX_RESPONSE_SIZE 30000
+#define TOP_HOLDER_MAX 10
+//Max iterations , each iteration requests 10 hodling assets
+#define MAX_HODLING_ITERATIONS 10
 #define debug_print(...)               \
     do                                 \
     {                                  \
@@ -62,10 +65,10 @@ public:
         double UnconfirmedBalanceNanos = 0;
         double TotalHODLBalanceClout = 0;
         int TotalHodleNum = 0;
-        char TopHodlersUserNames[10][20];
-        char TopHodlersPublicKeyBase58Check[10][56];
-        double TopHodlersCoins[10];
-        double TopHodlersCoinsPerc[10];
+        char TopHodlersUserNames[TOP_HOLDER_MAX][20];
+        char TopHodlersPublicKeyBase58Check[TOP_HOLDER_MAX][56];
+        double TopHodlersCoins[TOP_HOLDER_MAX];
+        double TopHodlersCoinsPerc[TOP_HOLDER_MAX];
         int lastNPostLikes = 0;
         int lastNPostDiamonds = 0;
     };

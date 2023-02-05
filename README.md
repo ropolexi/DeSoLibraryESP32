@@ -114,5 +114,12 @@ ESP32 Module
 - ArduinoJson - https://github.com/bblanchon/ArduinoJson
 - json-streaming-parser - https://github.com/squix78/json-streaming-parser
 
+## Configuration
+DeSoLib.h
+```
+#define TOP_HOLDER_MAX 10
+//Max iterations , each iteration requests 10 hodling assets
+#define MAX_HODLING_ITERATIONS 10
+```
 
 **DeSoLibraryESP32 library does not need any seed phrase to access any account. This library is for monitoring purposes only**
