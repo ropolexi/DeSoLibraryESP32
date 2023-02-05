@@ -35,10 +35,7 @@ const char *username = "ropolexi";
 ## Circuit wiring Diagram
 ![Circuit](img/esp32_circuit_lcd_bb.jpg)
 
-## Prototype
-
-![Circuit](img/circuit1.jpg)
-
+## Symbol Meaning
 D: DeSo Coin price
 
 C: Creator coin price
@@ -46,6 +43,11 @@ C: Creator coin price
 H: User hodle value
 
 B: User wallet balance
+
+## Demo Video
+
+https://www.youtube.com/watch?v=q6pR-kKL_XA
+
 
 
 
