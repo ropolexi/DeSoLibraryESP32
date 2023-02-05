@@ -14,7 +14,7 @@ const char username[] = "ropolexi";
 DeSoLib deso;
 DeSoLib::Profile profile1;
 int server_index = 0;
-void printLineLCD(int len, const char *body);
+void printLineLCD(int len, char *body);
 
 void nextServer()
 {
@@ -89,23 +89,59 @@ void bodyCLearLCD()
   lcd.setCursor(0 - 4, 3);
   lcd.print("                ");
 }
+void filter(char *body, char filter_ch)
+{
+  char *ret;
+  do
+  {
+    ret = strchr(body, filter_ch);
+    if (ret == NULL)
+      break;
+    while (*ret != ' ')
+    {
+      *ret = 24;
+      ret++;
+      if (*ret == '\0')
+        break;
+    }
+  } while (ret != NULL);
+}
 
-void printLineLCD(int len, const char *body)
+void filter_links(char *body)
+{
+  char *ret;
+  ret = strstr(body, "http");
+  if (ret != NULL)
+  {
+    Serial.println("Found link");
+
+    while (*ret != ' ')
+    {
+      *ret = 24;
+      ret++;
+      if (*ret == '\0')
+        break;
+    }
+  }
+}
+void printLineLCD(int len, char *body)
 {
   int index = 0;
   int row = 1;
   int col = 0;
   lcd.setCursor(col, row);
+
   while (len > 0)
   {
 
     if (body[index] >= 32 && body[index] <= 126)
     {
       lcd.write(body[index]);
-      delay(10);
+      col++;
+      delay(50);
     }
     index++;
-    col++;
+
     len--;
     if (col >= 16)
     {
@@ -129,7 +165,7 @@ void printLineLCD(int len, const char *body)
   }
 }
 
-void updatePostFeedLCD(const char *username, const char *body)
+void updatePostFeedLCD(const char *username, char *body)
 {
   lcd.setCursor(0, 0);
   lcd.print("                ");
@@ -152,12 +188,20 @@ void loop()
       {
         timer = millis();
         Serial.println("=== Posts Feed ===");
-        deso.updatePostsStatelessSave("", profile1.PublicKeyBase58Check, true, 10, false, 60);
+        int status = deso.updatePostsStatelessSave("", profile1.PublicKeyBase58Check, true, 10, false, 1);
+        if (status == 0)
+        {
+          nextServer();
+        }
         Serial.println("\n=== Posts End ===");
         while (millis() - timer < 60000UL)
         {
           for (int i = 0; i < deso.feeds.size(); i++)
           {
+            Serial.printf("[%s]%s\n", deso.feeds[i].username, deso.feeds[i].body);
+            filter(deso.feeds[i].body, '#');
+            filter(deso.feeds[i].body, '@');
+            filter_links(deso.feeds[i].body);
             updatePostFeedLCD(deso.feeds[i].username, deso.feeds[i].body);
             delay(2000);
           }

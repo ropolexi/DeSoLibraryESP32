@@ -609,13 +609,14 @@ int DeSoLib::updatePostsStatelessSave(const char *postHashHex, const char *reade
     doc["PostContent"] = "";
     doc["FetchSubcomments"] = false;
     doc["GetPostsForFollowFeed"] = getPostsForFollowFeed;
-    doc["GetPostsByDESO"] = false;
+    doc["GetPostsByDESO"] = true;
     doc["NumToFetch"] = numToFetch;
     doc["MediaRequired"] = false;
     doc["PostsByDESOMinutesLookback"] = postsByDESOMinutesLookback;
 
     doc["GetPostsForGlobalWhitelist"] = getPostsForGlobalWhitelist;
     serializeJson(doc, postData);
+    
     doc.clear();
     HTTPClient *https = postRequestNew(RoutePathGetPostsStateless, postData);
     if (https == NULL)
@@ -628,6 +629,7 @@ int DeSoLib::updatePostsStatelessSave(const char *postHashHex, const char *reade
     // Deserialize the document
     DeserializationError error = deserializeJson(doc, https->getStream(), DeserializationOption::Filter(filter));
     https->end();
+    //serializeJson(doc, Serial);
     if (doc.isNull())
     {
         serializeJsonPretty(doc, Serial);
