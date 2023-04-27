@@ -388,8 +388,8 @@ int DeSoLib::updateSinglePost(const char *postHashHex, bool fetchParents, int co
     }
     if (!error)
     {
-        strncpy(post->PostHashHex, doc["PostFound"]["PostHashHex"].as<char *>(), sizeof(post->PostHashHex));
-        strncpy(post->Body, doc["PostFound"]["Body"].as<char *>(), sizeof(post->Body));
+        strncpy(post->PostHashHex, doc["PostFound"]["PostHashHex"].as<const char*>(), sizeof(post->PostHashHex));
+        strncpy(post->Body, doc["PostFound"]["Body"].as<const char*>(), sizeof(post->Body));
         post->LikeCount = doc["PostFound"]["LikeCount"].as<int>();
         post->DiamondCount = doc["PostFound"]["DiamondCount"].as<int>();
         post->RepostCount = doc["PostFound"]["RepostCount"].as<int>();
@@ -441,7 +441,7 @@ int DeSoLib::updateLastNumPostsForPublicKey(const char *PublicKeysBase58Check, i
         for (JsonVariant value : arr)
         {
             String body = value["Body"];
-            // Serial.println(value["Body"].as<char *>());
+            // Serial.println(value["Body"].as<const char*>());
             if (body.length() > 0) // check without reposts
             {
                 int likes = value["LikeCount"];
@@ -641,8 +641,8 @@ int DeSoLib::updatePostsStatelessSave(const char *postHashHex, const char *reade
         {
             char body[200];
             char username[17];
-            strncpy(username, value["ProfileEntryResponse"]["Username"].as<char *>(), sizeof(username)-1);
-            strncpy(body, value["Body"].as<char *>(), sizeof(body));
+            strncpy(username, value["ProfileEntryResponse"]["Username"].as<const char*>(), sizeof(username)-1);
+            strncpy(body, value["Body"].as<const char*>(), sizeof(body));
             if (strlen(body) > 1)
             {
                 Feed feed_filtered;
@@ -785,7 +785,7 @@ int DeSoLib::updateHodleAssetBalance(const char *username, const char *PublicKey
                 double final_deso_value = pow(total_coins, bonding_curve_pow + 1) - pow((total_coins - bal), bonding_curve_pow + 1);
                 final_deso_value *= bonding_curve_gain / 3.0;
 #if DEBUG_LOG == true
-                Serial.print(value["ProfileEntryResponse"]["Username"].as<char *>());
+                Serial.print(value["ProfileEntryResponse"]["Username"].as<const char*>());
                 Serial.print(":");
                 Serial.print((final_deso_value * USDCentsPerBitCloutExchangeRate) / 100.0);
                 Serial.printf("(%f)\n", bal);
@@ -856,8 +856,8 @@ int DeSoLib::updateTopHolders(const char *username, const char *PublicKeyBase58C
             total_supply /= 1000000000.0;
             prof->TopHodlersCoins[count] = coins;
             prof->TopHodlersCoinsPerc[count] = coins * 100 / total_supply;
-            strncpy(prof->TopHodlersUserNames[count], value["ProfileEntryResponse"]["Username"].as<char *>(), sizeof(prof->TopHodlersUserNames[count]));
-            strncpy(prof->TopHodlersPublicKeyBase58Check[count], value["ProfileEntryResponse"]["PublicKeyBase58Check"].as<char *>(), sizeof(prof->TopHodlersPublicKeyBase58Check[count]));
+            strncpy(prof->TopHodlersUserNames[count], value["ProfileEntryResponse"]["Username"].as<const char*>(), sizeof(prof->TopHodlersUserNames[count]));
+            strncpy(prof->TopHodlersPublicKeyBase58Check[count], value["ProfileEntryResponse"]["PublicKeyBase58Check"].as<const char*>(), sizeof(prof->TopHodlersPublicKeyBase58Check[count]));
             count++;
             if (count >= 10)
                 break;
