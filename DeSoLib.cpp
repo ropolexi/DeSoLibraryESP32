@@ -448,6 +448,11 @@ int DeSoLib::updateLastNumPostsForPublicKey(const char *PublicKeysBase58Check, i
                 int diamonds = value["DiamondCount"];
                 prof->lastNPostLikes = prof->lastNPostLikes + likes;
                 prof->lastNPostDiamonds = prof->lastNPostDiamonds + diamonds;
+                addFeed(prof->Username, body.c_str());
+                if (feeds.size() > NumToFetch)
+                {
+                    feeds.erase(feeds.begin());
+                }
             }
         }
         status = 1;
