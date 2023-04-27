@@ -237,7 +237,11 @@ void loop()
     digitalWrite(LED_BUILTIN, HIGH);
     profile1.lastNPostDiamonds = -1;
     profile1.lastNPostLikes = -1;
-    deso.updateLastNumPostsForPublicKey(profile1.PublicKeyBase58Check, 1, &profile1);
+    deso.updateLastNumPostsForPublicKey(profile1.PublicKeyBase58Check, 3, &profile1);
+    for (int i = 0; i < deso.feeds.size(); i++)
+    {
+      Serial.printf("[%s]%s\n", deso.feeds[i].username, deso.feeds[i].body);
+    }
 
     deso.updateUsersBalance(profile1.PublicKeyBase58Check, &profile1);
     digitalWrite(LED_BUILTIN, LOW);
