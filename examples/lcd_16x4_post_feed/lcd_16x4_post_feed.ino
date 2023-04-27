@@ -47,9 +47,9 @@ void setup()
     delay(1000);
     Serial.print(".");
   }
-  deso.addNodePath("https://desocialworld.com", "");
-  deso.addNodePath("https://diamondapp.com", "");
-  deso.addNodePath("https://node.deso.org", "");
+  deso.addNodePath("https://desocialworld.com", GTS_Root_R1_caRootCert);
+  deso.addNodePath("https://diamondapp.com", Baltimore_Root_caRootCert);
+  deso.addNodePath("https://node.deso.org", GTS_Root_R1_caRootCert);
 
   deso.selectDefaultNode(0);
   int status = false;
