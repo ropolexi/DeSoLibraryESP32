@@ -1,7 +1,8 @@
 # DeSo Dashboard with 16x2 LCD
 
 ## Introduction
-This is to demonstrate the use of deso library to display information about deso price on a LED matrix display with esp32 microcontroller 
+This is to demonstrate the use of deso library to display information about deso price on a LED matrix display with esp32 microcontroller.
+Every 30 seconds it updates the price.
 
 ## Pre requisite libraries
 - https://github.com/bblanchon/ArduinoJson
@@ -11,10 +12,13 @@ This is to demonstrate the use of deso library to display information about deso
 
 ## Settings
 
-Wifi settings must to be entered in order to this example to work
+Wifi settings at line 10 must to be entered in order to this example to work
 
 ```
 // Fill in the ssid and password
 const char ssid[] = "";
 const char wifi_pass[] = "";
 ```
+
+## Demo Video
+https://www.youtube.com/watch?v=SxkemuOysz4
