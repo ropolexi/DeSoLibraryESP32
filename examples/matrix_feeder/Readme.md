@@ -1,4 +1,4 @@
-# DeSo Dashboard with 16x2 LCD
+# DeSo Post Feeder With LED Matrix Display
 
 ## Introduction
 This is to demonstrate the use of deso library to display information about following users posts on LED matrix displays with esp32 microcontroller.

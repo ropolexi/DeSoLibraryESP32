@@ -1,4 +1,4 @@
-# DeSo Dashboard with 16x2 LCD
+# DeSo Price Ticker with LED Matrix Display
 
 ## Introduction
 This is to demonstrate the use of deso library to display information about deso price on a LED matrix display with esp32 microcontroller.
