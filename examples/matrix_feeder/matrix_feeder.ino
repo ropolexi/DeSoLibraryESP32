@@ -8,7 +8,7 @@ DeSoLib deso;
 const char ssid[] = "";
 const char wifi_pass[] = "";
 const char username[] = "";
-uint16_t scrollDelay = 100; // in milliseconds
+uint16_t scrollDelay = 50; // in milliseconds
 
 DeSoLib::Profile profile1; // variable to store user profile details
 int server_index = 0;
