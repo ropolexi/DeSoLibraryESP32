@@ -11,7 +11,7 @@ const long gmtOffset_sec = 19800; //+5:30
 const int daylightOffset_sec = 0;
 
 // Fill in the username
-const char username[] = "ropolexi";
+const char username[] = "PurpleVan_Arduino";
 // Fill in the ssid and password
 const char ssid[] = "";
 const char wifi_pass[] = "";
