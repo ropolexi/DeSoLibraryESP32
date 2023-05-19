@@ -5,7 +5,7 @@
 #define RELAY1_PIN 13
 
 // Fill in the username
-const char username[] = "ropolexi";
+const char username[] = "PurpleVan_Arduino";
 const char postHash[] = "a6039c9a223d5fad11b05d54a152d0f77048a1552e06e7430697848db60abf71";
 // Fill in the ssid and password
 const char ssid[] = "";
