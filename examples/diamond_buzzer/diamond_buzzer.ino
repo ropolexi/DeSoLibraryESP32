@@ -6,7 +6,7 @@
 #define BUZZER_PIN 19
 
 // Fill in the username
-const char username[] = "ropolexi";
+const char username[] = "PurpleVan_Arduino";
 // Fill in the ssid and password
 const char ssid[] = "";
 const char wifi_pass[] = "";
