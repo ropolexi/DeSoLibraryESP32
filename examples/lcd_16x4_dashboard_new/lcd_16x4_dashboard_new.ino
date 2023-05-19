@@ -16,7 +16,7 @@ LiquidCrystal_I2C lcd(0x27, 16, 4);
 // Fill in the ssid and password
 const char ssid[] = "";
 const char wifi_pass[] = "";
-const char *username = "ropolexi";
+const char *username = "PurpleVan_Arduino";
 
 DeSoLib deso;
 DeSoLib::Profile profile1;
