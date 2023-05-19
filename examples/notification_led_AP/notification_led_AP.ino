@@ -23,7 +23,7 @@
 
 #define HOSTNAME "esp32deso"
 // Fill in the username
-const char username_default[] = "ropolexi";
+const char username_default[] = "PurpleVan_Arduino";
 const char post_hash_default[]= "592e078bf7fceda497577593cbafd52af7a34f08c37435b155169cb07a560da3";
 char username[20];
 // Fill in the ssid and password
