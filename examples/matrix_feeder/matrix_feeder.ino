@@ -7,7 +7,7 @@
 DeSoLib deso;
 const char ssid[] = "";
 const char wifi_pass[] = "";
-const char username[] = "";
+const char username[] = "PurpleVan_Arduino";
 uint16_t scrollDelay = 50; // in milliseconds
 
 DeSoLib::Profile profile1; // variable to store user profile details
@@ -38,7 +38,6 @@ char curMessage[BUF_SIZE];
 char newMessage[BUF_SIZE];
 bool newMessageAvailable = false;
 
-
 bool endOfMessage = false;
 void scrollDataSink(uint8_t dev, MD_MAX72XX::transformType_t t, uint8_t col)
 // Callback function for data that is being scrolled off the display
@@ -66,6 +65,10 @@ uint8_t scrollDataSource(uint8_t dev, MD_MAX72XX::transformType_t t)
   switch (state)
   {
   case 0: // Load the next character from the font table
+    while (*p == 24)
+    {
+      p++;
+    }
     showLen = mx.getChar(*p++, sizeof(cBuf) / sizeof(cBuf[0]), cBuf);
     curLen = 0;
     state++;
@@ -74,11 +77,14 @@ uint8_t scrollDataSource(uint8_t dev, MD_MAX72XX::transformType_t t)
     if (*p == '\0')
     {
       endOfMessage = true;
-      p = curMessage;          // reset the pointer to start of message
+      p--;
+
       if (newMessageAvailable) // there is a new message waiting
       {
         strcpy(curMessage, newMessage); // copy it in
         newMessageAvailable = false;
+        p = curMessage; // reset the pointer to start of message
+        endOfMessage = false;
       }
     }
     // !! deliberately fall through to next state to start displaying
@@ -162,23 +168,41 @@ void setup()
 
   strcpy(curMessage, " DESO Feed ");
   strcpy(newMessage, curMessage);
-  newMessageAvailable = true;
+  // newMessageAvailable = true;
+
+  while (!endOfMessage)
+  {
+    scrollText();
+  }
+  endOfMessage = false;
+  scrollText();
 }
 void filter(char *body, char filter_ch)
 {
-  char *ret;
+  int counter = 0;
+  char *ret = body;
+  char *pre_ret=body;
   do
   {
-    ret = strchr(body, filter_ch);
+    ret = strchr(ret, filter_ch);
     if (ret == NULL)
+    {
       break;
+    }
+    if(ret-pre_ret>2) counter=0;
+    counter++;
+    // erase if it repeats more than 2
+
     while (*ret != ' ')
     {
-      *ret = 24;
+      if (counter >= 2)
+        *ret = 24;
       ret++;
       if (*ret == '\0')
         break;
     }
+    pre_ret=ret;
+
   } while (ret != NULL);
 }
 
@@ -202,28 +226,44 @@ void filter_links(char *body)
 
 void loop()
 {
+  static unsigned long timer1 = -60000UL;
   if (WiFi.isConnected())
   {
-
-    Serial.println("=== Posts Feed ===");
-    int status = deso.updatePostsStatelessSave("", profile1.PublicKeyBase58Check, true, 5, false, 1);
-    if (status == 0)
+    if (millis() - timer1 > 60000UL)
     {
-      nextServer();
-    }
-    Serial.println("\n=== Posts End ===");
-
-    for (int i = 0; i < deso.feeds.size(); i++)
-    {
-      Serial.printf("[%s]%s\n", deso.feeds[i].username, deso.feeds[i].body);
-      snprintf(newMessage, sizeof(newMessage), "[%s] %s ", deso.feeds[i].username, deso.feeds[i].body);
-      newMessageAvailable = true;
-
-      while (!endOfMessage)
+      timer1 = millis();
+      Serial.println("=== Posts Feed ===");
+      int status = deso.updatePostsStatelessSave("", profile1.PublicKeyBase58Check, true, 5, false, 1);
+      if (status == 0)
       {
-        scrollText();
+        nextServer();
       }
-      endOfMessage = false;
+      Serial.println("\n=== Posts End ===");
+      static char pre_body[180];
+      if (strcmp(pre_body, deso.feeds[0].body) == 0)
+      {
+        Serial.println("No new posts.");
+      }
+      else
+      {
+        strcpy(pre_body, deso.feeds[0].body);
+        for (int i = 0; i < deso.feeds.size(); i++)
+        {
+
+          Serial.printf("[%s]%s\n", deso.feeds[i].username, deso.feeds[i].body);
+          filter_links(deso.feeds[i].body);
+          filter(deso.feeds[i].body, '@');
+          Serial.printf("Filtered [%s]%s\n", deso.feeds[i].username, deso.feeds[i].body);
+          snprintf(newMessage, sizeof(newMessage), "[%s] %s ", deso.feeds[i].username, deso.feeds[i].body);
+          newMessageAvailable = true;
+
+          while (!endOfMessage)
+          {
+            scrollText();
+          }
+          endOfMessage = false;
+        }
+      }
     }
   }
 }
