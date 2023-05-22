@@ -20,7 +20,7 @@ Wifi settings and username must to be entered in order to this example to work, 
 const char ssid[] = "";
 const char wifi_pass[] = "";
 const char username[] = "";
-uint16_t scrollDelay = 100; // in milliseconds
+uint16_t scrollDelay = 50; // in milliseconds
 ```
 
 ## Demo Video
