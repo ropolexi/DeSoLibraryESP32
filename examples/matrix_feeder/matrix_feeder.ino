@@ -7,7 +7,7 @@
 DeSoLib deso;
 const char ssid[] = "";
 const char wifi_pass[] = "";
-const char username[] = "PurpleVan_Arduino";
+const char username[] = "";
 uint16_t scrollDelay = 50; // in milliseconds
 
 DeSoLib::Profile profile1; // variable to store user profile details
@@ -23,7 +23,7 @@ int server_index = 0;
   }
 
 #define HARDWARE_TYPE MD_MAX72XX::FC16_HW
-#define MAX_DEVICES 4
+#define MAX_DEVICES 12
 
 #define CLK_PIN 18  // or SCK
 #define DATA_PIN 23 // or MOSI
@@ -130,6 +130,55 @@ void nextServer()
   if (server_index >= deso.getMaxNodes())
     server_index = 0;
 }
+
+void filter(char *body, char filter_ch)
+{
+  int counter = 0;
+  char *ret = body;
+  char *pre_ret = body;
+  do
+  {
+    ret = strchr(ret, filter_ch);
+    if (ret == NULL)
+    {
+      break;
+    }
+    if (ret - pre_ret > 2)
+      counter = 0;
+    counter++;
+    // erase if it repeats more than 2
+
+    while (*ret != ' ')
+    {
+      if (counter >= 2)
+        *ret = 24;
+      ret++;
+      if (*ret == '\0')
+        break;
+    }
+    pre_ret = ret;
+
+  } while (ret != NULL);
+}
+
+void filter_links(char *body)
+{
+  char *ret;
+  ret = strstr(body, "http");
+  if (ret != NULL)
+  {
+    Serial.println("Found link");
+
+    while (*ret != ' ')
+    {
+      *ret = 24;
+      ret++;
+      if (*ret == '\0')
+        break;
+    }
+  }
+}
+
 void setup()
 {
 
@@ -177,52 +226,6 @@ void setup()
   endOfMessage = false;
   scrollText();
 }
-void filter(char *body, char filter_ch)
-{
-  int counter = 0;
-  char *ret = body;
-  char *pre_ret=body;
-  do
-  {
-    ret = strchr(ret, filter_ch);
-    if (ret == NULL)
-    {
-      break;
-    }
-    if(ret-pre_ret>2) counter=0;
-    counter++;
-    // erase if it repeats more than 2
-
-    while (*ret != ' ')
-    {
-      if (counter >= 2)
-        *ret = 24;
-      ret++;
-      if (*ret == '\0')
-        break;
-    }
-    pre_ret=ret;
-
-  } while (ret != NULL);
-}
-
-void filter_links(char *body)
-{
-  char *ret;
-  ret = strstr(body, "http");
-  if (ret != NULL)
-  {
-    Serial.println("Found link");
-
-    while (*ret != ' ')
-    {
-      *ret = 24;
-      ret++;
-      if (*ret == '\0')
-        break;
-    }
-  }
-}
 
 void loop()
 {
@@ -233,7 +236,7 @@ void loop()
     {
       timer1 = millis();
       Serial.println("=== Posts Feed ===");
-      int status = deso.updatePostsStatelessSave("", profile1.PublicKeyBase58Check, true, 5, false, 1);
+      int status = deso.updatePostsStatelessSave("", profile1.PublicKeyBase58Check, true, 10, false, 1);
       if (status == 0)
       {
         nextServer();
@@ -249,7 +252,6 @@ void loop()
         strcpy(pre_body, deso.feeds[0].body);
         for (int i = 0; i < deso.feeds.size(); i++)
         {
-
           Serial.printf("[%s]%s\n", deso.feeds[i].username, deso.feeds[i].body);
           filter_links(deso.feeds[i].body);
           filter(deso.feeds[i].body, '@');
@@ -264,6 +266,15 @@ void loop()
           endOfMessage = false;
         }
       }
+      delay(2000);
+      for (int i = 0; i < deso.feeds.size(); i++)
+      {
+        deso.feeds.erase(deso.feeds.begin());
+      }
+      mx.begin(); // incase display is in error state
+      mx.control(MD_MAX72XX::INTENSITY, 1);
+      mx.setShiftDataInCallback(scrollDataSource);
+      mx.setShiftDataOutCallback(scrollDataSink);
     }
   }
 }
