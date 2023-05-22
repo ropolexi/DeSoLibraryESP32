@@ -3,7 +3,7 @@
 ## Introduction
 This is to demonstrate the use of deso library to display information about following users posts on LED matrix displays with esp32 microcontroller.
 
-<img src="esp32 matrix_schem.png" width="100"/>
+<img src="esp32 matrix_schem.png" width="500"/>
 ## Pre requisite libraries
 - https://github.com/bblanchon/ArduinoJson
 - https://github.com/ropolexi/DeSo-Arduino-Lib
