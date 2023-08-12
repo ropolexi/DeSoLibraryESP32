@@ -45,6 +45,20 @@ void DeSoLib::addFeed(const char *username, const char *body)
     feeds.push_back(feed);
 }
 
+void DeSoLib::addUser(const char *username)
+{
+    Users user;
+    strncpy(user.username, username, sizeof(user.username));
+    users.push_back(user);
+}
+void DeSoLib::eraseUsers()
+{
+    while (users.size() > 0)
+    {
+        users.erase(users.begin());
+    }
+}
+
 void DeSoLib::getFeed(int index, char *username, char *body)
 {
     strncpy(username, feeds[index].username, sizeof(feeds[index].username));
@@ -546,10 +560,10 @@ int DeSoLib::updatePostsStateless(const char *postHashHex, const char *readerPub
     doc["PostContent"] = "";
     doc["FetchSubcomments"] = false;
     doc["GetPostsForFollowFeed"] = false;
-    doc["GetPostsByDESO"] = false;
+    doc["GetPostsByDESO"] = true;
     doc["NumToFetch"] = numToFetch;
     doc["MediaRequired"] = false;
-    doc["PostsByDESOMinutesLookback"] = 0;
+    doc["PostsByDESOMinutesLookback"] = timePeriod/60;
 
     doc["GetPostsForGlobalWhitelist"] = getPostsForGlobalWhitelist;
     serializeJson(doc, postData);
@@ -739,7 +753,7 @@ HTTPClient *DeSoLib::updateHodlersForPublicKey(const char *PublicKeyBase58Check,
  * @param prof User profile
  * @return status
  */
-int DeSoLib::updateHodleAssetBalance(const char *username, const char *PublicKeyBase58Check, Profile *prof)
+int DeSoLib::updateHodleAssetBalance(const char *username, const char *PublicKeyBase58Check, Profile *prof,bool save)
 {
     int status = 0;
     char PreLastPublicKey[60];
@@ -756,7 +770,8 @@ int DeSoLib::updateHodleAssetBalance(const char *username, const char *PublicKey
     filter["Hodlers"][0]["ProfileEntryResponse"]["Username"] = true;
     //filter["Hodlers"][0]["ProfileEntryResponse"]["CoinPriceDeSoNanos"] = true;
     filter["Hodlers"][0]["ProfileEntryResponse"]["CoinEntry"]["CoinsInCirculationNanos"] = true;
-
+    if(save)
+        eraseUsers();
     while (first || strlen(LastPublicKey) > 1)
     {
         first = false;
@@ -790,10 +805,19 @@ int DeSoLib::updateHodleAssetBalance(const char *username, const char *PublicKey
                 double final_deso_value = pow(total_coins, bonding_curve_pow + 1) - pow((total_coins - bal), bonding_curve_pow + 1);
                 final_deso_value *= bonding_curve_gain / 3.0;
 #if DEBUG_LOG == true
-                Serial.print(value["ProfileEntryResponse"]["Username"].as<const char*>());
-                Serial.print(":");
-                Serial.print((final_deso_value * USDCentsPerBitCloutExchangeRate) / 100.0);
-                Serial.printf("(%f)\n", bal);
+                
+                char username[20];
+                if(save && final_deso_value>0.0001){
+                    strncpy(username, value["ProfileEntryResponse"]["Username"].as<const char*>(), sizeof(username)-1);
+                    username[sizeof(username)-1]='\0';
+                    addUser(username);
+                }
+                if(final_deso_value>0.0001){
+                    Serial.print(value["ProfileEntryResponse"]["Username"].as<const char*>());
+                    Serial.print(": ");
+                    Serial.print((final_deso_value * USDCentsPerBitCloutExchangeRate) / 100.0);
+                    Serial.printf(" (%f)\n", bal);
+                }
 #endif
                 amount += final_deso_value;
                 count++;
