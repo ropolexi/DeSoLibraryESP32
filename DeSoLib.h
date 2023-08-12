@@ -55,6 +55,11 @@ public:
         char username[17];
         char body[180];//for lcd display limit
     };
+
+    struct Users
+    {
+        char username[20];
+    };
     struct Profile
     {
         char PublicKeyBase58Check[56];
@@ -74,6 +79,7 @@ public:
     };
 
     std::vector<Feed> feeds;
+    std::vector<Users> users;
 
     char buff_small_1[200];
     char buff_small_2[200];
@@ -113,7 +119,7 @@ public:
     HTTPClient *updateHodlersForPublicKey(const char *PublicKeyBase58Check,
                                           const char *Username, const char *LastPublicKeyBase58Check, int NumToFetch,
                                           bool IsDAOCoin, bool FetchHodlings, const char *SortType, bool FetchAll, Profile *prof);
-    int updateHodleAssetBalance(const char *username, const char *PublicKeyBase58Check, Profile *prof);
+    int updateHodleAssetBalance(const char *username, const char *PublicKeyBase58Check,  Profile *prof,bool save=false);
     int updateTopHolders(const char *username, const char *PublicKeyBase58Check, int NumToFetch, Profile *prof);
     HTTPClient *postRequestNew(const char *apiPath, const char *data);
     int updatePostsStatelessSave(const char *postHashHex, const char *readerPublicKeyBase58Check,bool getPostsForFollowFeed, int numToFetch, bool getPostsForGlobalWhitelist, int postsByDESOMinutesLookback);
@@ -121,6 +127,8 @@ public:
     //const char *getSinglePost(const char *messagePayload);
     //const char *updateSinglePost(const char *PostHashHex, bool FetchParents, int CommentOffset, int CommentLimit, const char *ReaderPublicKeyBase58Check,Profile *prof);
     //const char *getComments(const char *PostHashHex,int CommentOffset,int CommentLimit);
+    void addUser(const char *username);
+    void eraseUsers();
     ~DeSoLib();
 
 private:
