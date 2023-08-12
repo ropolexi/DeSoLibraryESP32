@@ -885,6 +885,10 @@ int DeSoLib::updateTopHolders(const char *username, const char *PublicKeyBase58C
             total_supply /= 1000000000.0;
             prof->TopHodlersCoins[count] = coins;
             prof->TopHodlersCoinsPerc[count] = coins * 100 / total_supply;
+            if(!value.containsKey("ProfileEntryResponse")){
+                value["ProfileEntryResponse"]["Username"] = "NONE";
+                value["ProfileEntryResponse"]["PublicKeyBase58Check"]="NONE";
+            }
             strncpy(prof->TopHodlersUserNames[count], value["ProfileEntryResponse"]["Username"].as<const char*>(), sizeof(prof->TopHodlersUserNames[count]));
             strncpy(prof->TopHodlersPublicKeyBase58Check[count], value["ProfileEntryResponse"]["PublicKeyBase58Check"].as<const char*>(), sizeof(prof->TopHodlersPublicKeyBase58Check[count]));
             count++;
