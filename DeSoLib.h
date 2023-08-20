@@ -31,6 +31,7 @@ public:
     const char *RoutePathGetSinglePost = "/api/v0/get-single-post";
     const char *RoutePathGetBalance = "/api/v1/balance";
     const char *RoutePathGetPostsStateless = "/api/v0/get-posts-stateless";
+    const char *CountPostAssociationsSingle = "/api/v0/post-associations/count";
     const char *CountPostAssociations = "/api/v0/post-associations/counts";
 
     struct Node

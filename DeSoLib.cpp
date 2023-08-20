@@ -448,12 +448,12 @@ int DeSoLib::countPostAssociationSingle(const char *transactorPublicKeyBase58Che
 
     serializeJson(doc, postData);
     doc.clear();
-    HTTPClient *https = postRequestNew(CountPostAssociations, postData);
+    HTTPClient *https = postRequestNew(CountPostAssociationsSingle, postData);
     if (https == NULL)
         return 0;
     //Serial.println(https->getString());
     DynamicJsonDocument filter(200);
-    filter["Counts"][associationValue] = true;
+    filter["Count"] = true;
   
     DeserializationError error = deserializeJson(doc, https->getStream(), DeserializationOption::Filter(filter));
     https->end();
@@ -464,7 +464,7 @@ int DeSoLib::countPostAssociationSingle(const char *transactorPublicKeyBase58Che
     }
     if (!error)
     {
-        *count = doc["Counts"][associationValue].as<int>();
+        *count = doc["Count"].as<int>();
         status = 1;
     }
     else
