@@ -368,6 +368,69 @@ const char *DeSoLib::getSinglePost(const char *messagePayload)
     return postRequest(RoutePathGetSinglePost, messagePayload);
 }
 
+int DeSoLib::countPostAssociation(const char *transactorPublicKeyBase58Check, const char *postHashHex, ReactionCount *reactionCount)
+{
+    int status = 0;
+    static char postData[1024];
+    DynamicJsonDocument doc(ESP.getMaxAllocHeap() / 2 - 5000);
+    doc["TransactorPublicKeyBase58Check"] = transactorPublicKeyBase58Check;
+    doc["PostHashHex"] = postHashHex;
+    doc["AppPublicKeyBase58Check"] = "";
+    doc["AssociationType"] = "REACTION";
+    // doc["AssociationTypePrefix"]="";
+
+    doc["AssociationValues"][0] = "LIKE";
+    doc["AssociationValues"][1] = "DISLIKE";
+    doc["AssociationValues"][2] = "LOVE";
+    doc["AssociationValues"][3] = "LAUGH";
+    doc["AssociationValues"][4] = "ASTONISHED";
+    doc["AssociationValues"][5] = "SAD";
+    doc["AssociationValues"][6] = "ANGRY";
+    // doc["AssociationValuePrefix"]="";
+
+    serializeJson(doc, postData);
+    doc.clear();
+    HTTPClient *https = postRequestNew(CountPostAssociations, postData);
+    if (https == NULL)
+        return 0;
+    DynamicJsonDocument filter(200);
+    filter["Counts"]["LIKE"] = true;
+    filter["Counts"]["DISLIKE"] = true;
+    filter["Counts"]["LOVE"] = true;
+    filter["Counts"]["LAUGH"] = true;
+    filter["Counts"]["ASTONISHED"] = true;
+    filter["Counts"]["SAD"] = true;
+    filter["Counts"]["ANGRY"] = true;
+    filter["Total"] = true;
+  
+    DeserializationError error = deserializeJson(doc, https->getStream(), DeserializationOption::Filter(filter));
+    https->end();
+    //serializeJsonPretty(doc, Serial);
+    if (doc.isNull())
+    {
+        serializeJsonPretty(doc, Serial);
+    }
+    if (!error)
+    {
+        reactionCount->like = doc["Counts"]["LIKE"].as<byte>();
+        reactionCount->dislike = doc["Counts"]["DISLIKE"].as<byte>();
+        reactionCount->love = doc["Counts"]["LOVE"].as<byte>();
+        reactionCount->laugh = doc["Counts"]["LAUGH"].as<byte>();
+        reactionCount->astonished = doc["Counts"]["ASTONISHED"].as<byte>();
+        reactionCount->sad = doc["Counts"]["SAD"].as<byte>();
+        reactionCount->angry = doc["Counts"]["ANGRY"].as<byte>();
+        reactionCount->total = doc["Total"].as<int>();
+        status = 1;
+    }
+    else
+    {
+        debug_print("Json Error");
+    }
+
+    doc.garbageCollect();
+    status = 1;
+    return status;
+}
 int DeSoLib::updateSinglePost(const char *postHashHex, bool fetchParents, int commentOffset, int commentLimit, const char *readerPublicKeyBase58Check, bool addGlobalFeedBool, Post *post)
 {
     int status = 0;
@@ -402,8 +465,8 @@ int DeSoLib::updateSinglePost(const char *postHashHex, bool fetchParents, int co
     }
     if (!error)
     {
-        strncpy(post->PostHashHex, doc["PostFound"]["PostHashHex"].as<const char*>(), sizeof(post->PostHashHex));
-        strncpy(post->Body, doc["PostFound"]["Body"].as<const char*>(), sizeof(post->Body));
+        strncpy(post->PostHashHex, doc["PostFound"]["PostHashHex"].as<const char *>(), sizeof(post->PostHashHex));
+        strncpy(post->Body, doc["PostFound"]["Body"].as<const char *>(), sizeof(post->Body));
         post->LikeCount = doc["PostFound"]["LikeCount"].as<int>();
         post->DiamondCount = doc["PostFound"]["DiamondCount"].as<int>();
         post->RepostCount = doc["PostFound"]["RepostCount"].as<int>();
@@ -563,7 +626,7 @@ int DeSoLib::updatePostsStateless(const char *postHashHex, const char *readerPub
     doc["GetPostsByDESO"] = true;
     doc["NumToFetch"] = numToFetch;
     doc["MediaRequired"] = false;
-    doc["PostsByDESOMinutesLookback"] = timePeriod/60;
+    doc["PostsByDESOMinutesLookback"] = timePeriod / 60;
 
     doc["GetPostsForGlobalWhitelist"] = getPostsForGlobalWhitelist;
     serializeJson(doc, postData);
@@ -635,7 +698,7 @@ int DeSoLib::updatePostsStatelessSave(const char *postHashHex, const char *reade
 
     doc["GetPostsForGlobalWhitelist"] = getPostsForGlobalWhitelist;
     serializeJson(doc, postData);
-    
+
     doc.clear();
     HTTPClient *https = postRequestNew(RoutePathGetPostsStateless, postData);
     if (https == NULL)
@@ -648,7 +711,7 @@ int DeSoLib::updatePostsStatelessSave(const char *postHashHex, const char *reade
     // Deserialize the document
     DeserializationError error = deserializeJson(doc, https->getStream(), DeserializationOption::Filter(filter));
     https->end();
-    //serializeJson(doc, Serial);
+    // serializeJson(doc, Serial);
     if (doc.isNull())
     {
         serializeJsonPretty(doc, Serial);
@@ -660,8 +723,8 @@ int DeSoLib::updatePostsStatelessSave(const char *postHashHex, const char *reade
         {
             char body[200];
             char username[17];
-            strncpy(username, value["ProfileEntryResponse"]["Username"].as<const char*>(), sizeof(username)-1);
-            strncpy(body, value["Body"].as<const char*>(), sizeof(body));
+            strncpy(username, value["ProfileEntryResponse"]["Username"].as<const char *>(), sizeof(username) - 1);
+            strncpy(body, value["Body"].as<const char *>(), sizeof(body));
             if (strlen(body) > 1)
             {
                 Feed feed_filtered;
@@ -672,14 +735,14 @@ int DeSoLib::updatePostsStatelessSave(const char *postHashHex, const char *reade
                     {
                         feed_filtered.body[index] = body[i];
                         index++;
-                        if (index >= sizeof(feed_filtered.body)-1)
+                        if (index >= sizeof(feed_filtered.body) - 1)
                         {
                             break;
                         }
                     }
                 }
                 feed_filtered.body[index] = '\0';
-                username[sizeof(username)-1]= '\0';
+                username[sizeof(username) - 1] = '\0';
 
                 addFeed(username, feed_filtered.body);
                 if (feeds.size() > numToFetch)
@@ -753,7 +816,7 @@ HTTPClient *DeSoLib::updateHodlersForPublicKey(const char *PublicKeyBase58Check,
  * @param prof User profile
  * @return status
  */
-int DeSoLib::updateHodleAssetBalance(const char *username, const char *PublicKeyBase58Check, Profile *prof,bool save)
+int DeSoLib::updateHodleAssetBalance(const char *username, const char *PublicKeyBase58Check, Profile *prof, bool save)
 {
     int status = 0;
     char PreLastPublicKey[60];
@@ -763,14 +826,14 @@ int DeSoLib::updateHodleAssetBalance(const char *username, const char *PublicKey
     memset(LastPublicKey, 0, sizeof(LastPublicKey));
     DynamicJsonDocument filter(300);
     bool first = true;
-    int iterations=0;
+    int iterations = 0;
 
     filter["LastPublicKeyBase58Check"] = true;
     filter["Hodlers"][0]["BalanceNanos"] = true;
     filter["Hodlers"][0]["ProfileEntryResponse"]["Username"] = true;
-    //filter["Hodlers"][0]["ProfileEntryResponse"]["CoinPriceDeSoNanos"] = true;
+    // filter["Hodlers"][0]["ProfileEntryResponse"]["CoinPriceDeSoNanos"] = true;
     filter["Hodlers"][0]["ProfileEntryResponse"]["CoinEntry"]["CoinsInCirculationNanos"] = true;
-    if(save)
+    if (save)
         eraseUsers();
     while (first || strlen(LastPublicKey) > 1)
     {
@@ -805,15 +868,17 @@ int DeSoLib::updateHodleAssetBalance(const char *username, const char *PublicKey
                 double final_deso_value = pow(total_coins, bonding_curve_pow + 1) - pow((total_coins - bal), bonding_curve_pow + 1);
                 final_deso_value *= bonding_curve_gain / 3.0;
 #if DEBUG_LOG == true
-                
+
                 char username[20];
-                if(save && final_deso_value>0.0001){
-                    strncpy(username, value["ProfileEntryResponse"]["Username"].as<const char*>(), sizeof(username)-1);
-                    username[sizeof(username)-1]='\0';
+                if (save && final_deso_value > 0.0001)
+                {
+                    strncpy(username, value["ProfileEntryResponse"]["Username"].as<const char *>(), sizeof(username) - 1);
+                    username[sizeof(username) - 1] = '\0';
                     addUser(username);
                 }
-                if(final_deso_value>0.0001){
-                    Serial.print(value["ProfileEntryResponse"]["Username"].as<const char*>());
+                if (final_deso_value > 0.0001)
+                {
+                    Serial.print(value["ProfileEntryResponse"]["Username"].as<const char *>());
                     Serial.print(": ");
                     Serial.print((final_deso_value * USDCentsPerBitCloutExchangeRate) / 100.0);
                     Serial.printf(" (%f)\n", bal);
@@ -830,7 +895,8 @@ int DeSoLib::updateHodleAssetBalance(const char *username, const char *PublicKey
         }
         doc.garbageCollect();
         iterations++;
-        if(iterations>MAX_HODLING_ITERATIONS){
+        if (iterations > MAX_HODLING_ITERATIONS)
+        {
             break;
         }
     }
@@ -868,12 +934,13 @@ int DeSoLib::updateTopHolders(const char *username, const char *PublicKeyBase58C
     if (!error)
     {
         JsonArray arr = doc["Hodlers"].as<JsonArray>();
-        //clear previous data
-        for(int i=0;i<TOP_HOLDER_MAX;i++){
-            prof->TopHodlersCoins[i]=0;
-            prof->TopHodlersCoinsPerc[i]=0;
-            memset(prof->TopHodlersUserNames[i],0,sizeof(prof->TopHodlersUserNames[i]));
-            memset(prof->TopHodlersPublicKeyBase58Check[i],0,sizeof(prof->TopHodlersPublicKeyBase58Check[i]));
+        // clear previous data
+        for (int i = 0; i < TOP_HOLDER_MAX; i++)
+        {
+            prof->TopHodlersCoins[i] = 0;
+            prof->TopHodlersCoinsPerc[i] = 0;
+            memset(prof->TopHodlersUserNames[i], 0, sizeof(prof->TopHodlersUserNames[i]));
+            memset(prof->TopHodlersPublicKeyBase58Check[i], 0, sizeof(prof->TopHodlersPublicKeyBase58Check[i]));
         }
         int count = 0;
 
@@ -885,12 +952,13 @@ int DeSoLib::updateTopHolders(const char *username, const char *PublicKeyBase58C
             total_supply /= 1000000000.0;
             prof->TopHodlersCoins[count] = coins;
             prof->TopHodlersCoinsPerc[count] = coins * 100 / total_supply;
-            if(!value.containsKey("ProfileEntryResponse")){
+            if (!value.containsKey("ProfileEntryResponse"))
+            {
                 value["ProfileEntryResponse"]["Username"] = "NONE";
-                value["ProfileEntryResponse"]["PublicKeyBase58Check"]="NONE";
+                value["ProfileEntryResponse"]["PublicKeyBase58Check"] = "NONE";
             }
-            strncpy(prof->TopHodlersUserNames[count], value["ProfileEntryResponse"]["Username"].as<const char*>(), sizeof(prof->TopHodlersUserNames[count]));
-            strncpy(prof->TopHodlersPublicKeyBase58Check[count], value["ProfileEntryResponse"]["PublicKeyBase58Check"].as<const char*>(), sizeof(prof->TopHodlersPublicKeyBase58Check[count]));
+            strncpy(prof->TopHodlersUserNames[count], value["ProfileEntryResponse"]["Username"].as<const char *>(), sizeof(prof->TopHodlersUserNames[count]));
+            strncpy(prof->TopHodlersPublicKeyBase58Check[count], value["ProfileEntryResponse"]["PublicKeyBase58Check"].as<const char *>(), sizeof(prof->TopHodlersPublicKeyBase58Check[count]));
             count++;
             if (count >= 10)
                 break;

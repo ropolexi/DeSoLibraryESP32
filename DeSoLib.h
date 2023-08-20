@@ -31,6 +31,7 @@ public:
     const char *RoutePathGetSinglePost = "/api/v0/get-single-post";
     const char *RoutePathGetBalance = "/api/v1/balance";
     const char *RoutePathGetPostsStateless = "/api/v0/get-posts-stateless";
+    const char *CountPostAssociations = "/api/v0/post-associations/counts";
 
     struct Node
     {
@@ -48,6 +49,18 @@ public:
         int RepostCount=0;
         int QuoteRepostCount=0;
         bool LikedByReader=false;
+    };
+
+    struct ReactionCount
+    {
+        byte like = 0;
+        byte dislike = 0;
+        byte love = 0;
+        byte sad = 0;
+        byte angry = 0;
+        byte astonished = 0;
+        byte laugh = 0;
+        int total = 0;
     };
 
     struct Feed
@@ -80,7 +93,7 @@ public:
 
     std::vector<Feed> feeds;
     std::vector<Users> users;
-
+ 
     char buff_small_1[200];
     char buff_small_2[200];
     //char buff_large[1024]; // heavy usage on web response
@@ -129,6 +142,7 @@ public:
     //const char *getComments(const char *PostHashHex,int CommentOffset,int CommentLimit);
     void addUser(const char *username);
     void eraseUsers();
+    int countPostAssociation(const char* transactorPublicKeyBase58Check, const char* postHashHex, ReactionCount* reactionCount);
     ~DeSoLib();
 
 private:
