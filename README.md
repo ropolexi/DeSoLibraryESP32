@@ -18,47 +18,8 @@ This is an unofficial personal arduino library to monitor the DeSo (Decentralize
 - V1 API to get balance
 - Global Recent posts feed
 - Actual hodle asset sum 
+- Count Post Reaction Association
 
-Note: Top 10 Hodlers (Recommand Top 5 in case memory issue)
-
-## Serial Output Results
-```
-DeSo Node: https://bitclout.com
-Node Status: Synced OK
-DeSo Coin Value: $121.90
-=======Profile========
-Username: ropolexi
-PublicKey: BC1YLfghVqEg2igrpA36eS87pPEGiZ65iXYb8BosKGGHz7JWNF3s2H8
-Creator Coin Price: $31.68
-Wallet Balance: $1.02
-Total HODLE assets : 4
-Total HODLE Asset Balance: $35.40
-======================
-
-DeSo Node: https://nachoaverage.com
-Node Status: Synced OK
-DeSo Coin Value: $121.90
-=======Profile========
-Username: ropolexi
-PublicKey: BC1YLfghVqEg2igrpA36eS87pPEGiZ65iXYb8BosKGGHz7JWNF3s2H8
-Creator Coin Price: $31.68
-Wallet Balance: $1.02
-Total HODLE assets : 4
-Total HODLE Asset Balance: $35.40
-======================
-
-DeSo Node: https://members.giftclout.com
-Node Status: Synced OK
-DeSo Coin Value: $121.90
-=======Profile========
-Username: ropolexi
-PublicKey: BC1YLfghVqEg2igrpA36eS87pPEGiZ65iXYb8BosKGGHz7JWNF3s2H8
-Creator Coin Price: $31.68
-Wallet Balance: $1.02
-Total HODLE assets : 4
-Total HODLE Asset Balance: $35.40
-======================
-```
 ## Device Supported
 
 ![esp32](esp32.jpg)
@@ -100,6 +61,12 @@ ESP32 Module
 - int updateHodleAssetBalance(const char *username, const char *PublicKeyBase58Check, Profile *prof);
 - int updateTopHolders(const char *username, const char *PublicKeyBase58Check, int NumToFetch, Profile *prof);
 - HTTPClient *postRequestNew(const char *apiPath, const char *data);
+- int updatePostsStatelessSave(const char *postHashHex, const char *readerPublicKeyBase58Check,bool getPostsForFollowFeed, int numToFetch, bool getPostsForGlobalWhitelist, int postsByDESOMinutesLookback);
+- void getFeed(int index,char *username,char *body);
+- void addUser(const char *username);
+- void eraseUsers();
+- int countPostAssociation(const char* transactorPublicKeyBase58Check, const char* postHashHex, ReactionCount* reactionCount);
+- int countPostAssociationSingle(const char *transactorPublicKeyBase58Check, const char *postHashHex,const char* associationValue, int* count);
    
 ## Changes
 - (2021-10-1) support old and new api changes due to rebranding.
@@ -110,16 +77,9 @@ ESP32 Module
 - (2022-12-4) Hodling asset balance for all the assets by retrieving 10 assets at a time to avoid memory overflow
 - (2022-12-5) wallet balance json decode using json-streaming-parser to avoid long list of UTXOs (unpend transactions). Now faster decoding for wallet balance.
 - (2023-1-30) Updated functions updateTopHolders, updateHodleAssetBalance,updateSinglePost,updateSingleProfile, updatePostsStateless and updateLastNumPostsForPublicKey to support large json data 
+- (2023-8-20) Post reaction association support
 ## Dependency Libraries
 - ArduinoJson - https://github.com/bblanchon/ArduinoJson
 - json-streaming-parser - https://github.com/squix78/json-streaming-parser
 
-## Configuration
-DeSoLib.h
-```
-#define TOP_HOLDER_MAX 10
-//Max iterations , each iteration requests 10 hodling assets
-#define MAX_HODLING_ITERATIONS 10
-```
-
-**DeSoLibraryESP32 library does not need any seed phrase to access any account. This library is for monitoring purposes only**
+**DeSoLibraryESP32 library does not need any seed phrase to access any account. This library is for monitoring and experimental purposes only.**
