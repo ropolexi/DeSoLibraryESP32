@@ -431,6 +431,51 @@ int DeSoLib::countPostAssociation(const char *transactorPublicKeyBase58Check, co
     status = 1;
     return status;
 }
+
+
+int DeSoLib::countPostAssociationSingle(const char *transactorPublicKeyBase58Check, const char *postHashHex,const char* associationValue, int* count)
+{
+    int status = 0;
+    static char postData[1024];
+    DynamicJsonDocument doc(ESP.getMaxAllocHeap() / 2 - 5000);
+    doc["TransactorPublicKeyBase58Check"] = transactorPublicKeyBase58Check;
+    doc["PostHashHex"] = postHashHex;
+    doc["AppPublicKeyBase58Check"] = "";
+    doc["AssociationType"] = "REACTION";
+    //doc["AssociationTypePrefix"]="";
+    doc["AssociationValue"] = associationValue;
+    //doc["AssociationValuePrefix"]="";
+
+    serializeJson(doc, postData);
+    doc.clear();
+    HTTPClient *https = postRequestNew(CountPostAssociations, postData);
+    if (https == NULL)
+        return 0;
+    //Serial.println(https->getString());
+    DynamicJsonDocument filter(200);
+    filter["Counts"][associationValue] = true;
+  
+    DeserializationError error = deserializeJson(doc, https->getStream(), DeserializationOption::Filter(filter));
+    https->end();
+    //serializeJsonPretty(doc, Serial);
+    if (doc.isNull())
+    {
+        serializeJsonPretty(doc, Serial);
+    }
+    if (!error)
+    {
+        *count = doc["Counts"][associationValue].as<int>();
+        status = 1;
+    }
+    else
+    {
+        debug_print("Json Error");
+    }
+
+    doc.garbageCollect();
+    status = 1;
+    return status;
+}
 int DeSoLib::updateSinglePost(const char *postHashHex, bool fetchParents, int commentOffset, int commentLimit, const char *readerPublicKeyBase58Check, bool addGlobalFeedBool, Post *post)
 {
     int status = 0;

@@ -143,6 +143,7 @@ public:
     void addUser(const char *username);
     void eraseUsers();
     int countPostAssociation(const char* transactorPublicKeyBase58Check, const char* postHashHex, ReactionCount* reactionCount);
+    int countPostAssociationSingle(const char *transactorPublicKeyBase58Check, const char *postHashHex,const char* associationValue, int* count);
     ~DeSoLib();
 
 private:
