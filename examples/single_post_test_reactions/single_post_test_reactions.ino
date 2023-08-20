@@ -62,11 +62,10 @@ void loop()
       Serial.println();
       Serial.print("DeSo Node: ");
       Serial.println(deso.getSelectedNodeUrl());
-      DeSoLib::ReactionCount reactionCount;
-      if(deso.countPostAssociation(userPublicKey, postHash, &reactionCount)){
-        Serial.printf("\nTotal Reactions:%d\n",reactionCount.total);
-        Serial.printf("Like:%d\n",reactionCount.like);
-        if(reactionCount.like ==1){
+      int count;
+      if(deso.countPostAssociationSingle(userPublicKey, postHash, "LIKE",&count)){
+        Serial.printf("Like:%d\n",count);
+        if(count ==1){
           digitalWrite(LED_PIN,HIGH);
         }else{
           digitalWrite(LED_PIN,LOW);
