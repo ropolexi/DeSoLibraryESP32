@@ -33,6 +33,7 @@ public:
     const char *RoutePathGetPostsStateless = "/api/v0/get-posts-stateless";
     const char *CountPostAssociationsSingle = "/api/v0/post-associations/count";
     const char *CountPostAssociations = "/api/v0/post-associations/counts";
+    const char *NFTEntriesForNFTPost = "/api/v0/get-nft-entries-for-nft-post";
 
     struct Node
     {
@@ -145,6 +146,7 @@ public:
     void eraseUsers();
     int countPostAssociation(const char* transactorPublicKeyBase58Check, const char* postHashHex, ReactionCount* reactionCount);
     int countPostAssociationSingle(const char *transactorPublicKeyBase58Check, const char *postHashHex,const char* associationValue, int* count);
+    int getNFTEntriesForNFTPost(const char *postHashHex,int serialNumber,char *OwnerPublicKeyBase58Check);
     ~DeSoLib();
 
 private:

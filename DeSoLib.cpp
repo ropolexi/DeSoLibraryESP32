@@ -1018,6 +1018,46 @@ int DeSoLib::updateTopHolders(const char *username, const char *PublicKeyBase58C
     return status;
 }
 
+int DeSoLib::getNFTEntriesForNFTPost(const char *postHashHex,int serialNumber, char *OwnerPublicKeyBase58Check){
+    
+    int status = 0;
+    char postData[1024];
+    DynamicJsonDocument doc(ESP.getMaxAllocHeap() / 2 - 5000);
+    if (strlen(postHashHex) > 0)
+    {
+        doc["PostHashHex"] = postHashHex;
+    }
+    serializeJson(doc, postData);
+
+    doc.clear();
+    HTTPClient *https = postRequestNew(NFTEntriesForNFTPost, postData);
+    if (https == NULL)
+        return 0;
+    DynamicJsonDocument filter(100);
+    filter["NFTEntryResponses"]= true;
+
+    // Deserialize the document
+    DeserializationError error = deserializeJson(doc, https->getStream(), DeserializationOption::Filter(filter));
+    https->end();
+    // serializeJson(doc, Serial);
+    if (doc.isNull())
+    {
+        serializeJsonPretty(doc, Serial);
+    }
+    if (!error)
+    {
+        strncpy(OwnerPublicKeyBase58Check,doc["NFTEntryResponses"][serialNumber-1]["OwnerPublicKeyBase58Check"].as<const char*>(),56);
+
+        status = 1;
+    }
+    else
+    {
+        debug_print("Json Error");
+    }
+    doc.garbageCollect();
+    return status;
+    
+}
 DeSoLib::~DeSoLib()
 {
 }
