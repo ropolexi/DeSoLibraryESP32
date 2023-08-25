@@ -12,6 +12,112 @@
 DeSoLib::DeSoLib()
 {
 }
+
+HTTPClient *DeSoLib::getRequest(const char *apiPath)
+{
+    static HTTPClient https;
+    if (strcmp(nodePaths[selectedNodeIndex].caRootCert, ""))
+    {
+        espClientSecure.setCACert(nodePaths[selectedNodeIndex].caRootCert);
+    }
+    else
+    {
+        Serial.println("Selecting insecure method,not checking site authenticity");
+        espClientSecure.setInsecure();
+    }
+    https.addHeader("User-Agent", "Mozilla/5.0");
+    https.addHeader("Content-Type", "application/x-www-form-urlencoded");
+    snprintf(buff_small_1, sizeof(buff_small_1), "%s%s", nodePaths[selectedNodeIndex].url, apiPath);
+
+    if (https.begin(espClientSecure, String(buff_small_1)))
+    {
+        int httpCode = https.GET();
+        if (httpCode > 0)
+        {
+            if (httpCode == HTTP_CODE_OK)
+                return &https;
+            else
+                debug_print(httpCode);
+        }
+        else
+            debug_print(httpCode);
+    }
+    else
+        debug_print("Error https");
+
+    return NULL;
+}
+
+int DeSoLib::updateNodeHealthCheck()
+{
+    int status = 0;
+    HTTPClient *client = getRequest(RoutePathHealthCheck);
+    if (client == NULL)
+    {
+        nodePaths[selectedNodeIndex].status = false;
+        return 0;
+    }
+    snprintf(buff_small_1,sizeof(buff_small_1),client->getString().c_str());
+    if (strcmp(buff_small_1, "200") == 0)
+    {
+        status = 1;
+        nodePaths[selectedNodeIndex].status = true;
+    }
+    else
+    {
+        debug_print(buff_small_1);
+        nodePaths[selectedNodeIndex].status = false;
+    }
+    client->end();
+    return status;
+}
+
+int DeSoLib::updateExchangeRates()
+{
+    int status = 0;
+    DynamicJsonDocument doc(ESP.getMaxAllocHeap() / 2 - 5000);
+
+    HTTPClient *client = getRequest(ExchangeRateRoute);
+    if(client==NULL)
+        return 0;
+
+    DynamicJsonDocument filter(300);
+    filter["USDCentsPerBitCloutExchangeRate"] = true;
+    filter["USDCentsPerDeSoExchangeRate"]= true;
+    filter["USDCentsPerBitcoinExchangeRate"] = true;
+
+    // Deserialize the document
+    DeserializationError error = deserializeJson(doc, client->getStream(), DeserializationOption::Filter(filter));
+    client->end();
+
+    if (doc.isNull())
+        return 0;
+    
+    if (!error)
+    {
+        JsonVariant value;
+        value =doc["USDCentsPerBitCloutExchangeRate"];
+        if(!value.isNull())
+            USDCentsPerBitCloutExchangeRate = value.as<double>();
+        if (USDCentsPerBitCloutExchangeRate == 0)
+        {
+            value =doc["USDCentsPerDeSoExchangeRate"];
+            if(!value.isNull())
+                USDCentsPerBitCloutExchangeRate = value.as<double>(); // api changed
+        }
+        value =doc["USDCentsPerBitcoinExchangeRate"];
+        if(!value.isNull())
+            USDCentsPerBitcoinExchangeRate = value.as<double>();
+        status = 1;
+    }else{
+        #if(DEBUG_LOG==true)
+            serializeJsonPretty(doc, Serial);
+        #endif
+    }
+        
+    doc.garbageCollect();
+    return status;
+}
 void DeSoLib::addNodePath(const char *url, const char *cert)
 {
     Node n;
@@ -65,54 +171,6 @@ void DeSoLib::getFeed(int index, char *username, char *body)
     strncpy(body, feeds[index].body, sizeof(feeds[index].body));
 }
 
-const char *DeSoLib::getRequest(const char *apiPath)
-{
-    HTTPClient https;
-    // char url_str[100];
-    const char *buff_ptr;
-    // memset(buff_large, 0, sizeof(buff_large));
-    if (strcmp(nodePaths[selectedNodeIndex].caRootCert, ""))
-    {
-        espClientSecure.setCACert(nodePaths[selectedNodeIndex].caRootCert);
-    }
-    else
-    {
-        Serial.println("Selecting insecure method,not checking site authenticity");
-        espClientSecure.setInsecure();
-    }
-    https.addHeader("User-Agent", "Mozilla/5.0");
-    https.addHeader("Content-Type", "application/x-www-form-urlencoded");
-    // snprintf(url_str, sizeof(url_str), "%s%s", nodePaths[selectedNodeIndex].url, apiPath);
-    snprintf(buff_small_1, sizeof(buff_small_1), "%s%s", nodePaths[selectedNodeIndex].url, apiPath);
-
-    if (https.begin(espClientSecure, buff_small_1))
-    {
-        int httpCode = https.GET();
-        if (httpCode > 0)
-        {
-            if (httpCode == HTTP_CODE_OK)
-            {
-                strncpy(buff_response, https.getString().c_str(), MAX_RESPONSE_SIZE);
-                // buff_ptr = https.getString().c_str();
-            }
-            else
-            {
-                debug_print(httpCode);
-            }
-        }
-        else
-        {
-            debug_print(httpCode);
-        }
-    }
-    else
-    {
-        debug_print("Error https");
-    }
-    https.end();
-    buff_ptr = buff_response;
-    return buff_ptr;
-}
 const char *DeSoLib::postRequest(const char *apiPath, const char *data)
 {
     HTTPClient https;
@@ -218,55 +276,6 @@ HTTPClient *DeSoLib::postRequestNew(const char *apiPath, const char *data)
     return NULL;
 }
 
-const char *DeSoLib::getNodeHealthCheck()
-{
-    return getRequest(RoutePathHealthCheck);
-}
-
-int DeSoLib::updateNodeHealthCheck()
-{
-    int status = 0;
-    buff_response = (char *)malloc(MAX_RESPONSE_SIZE);
-    if (strcmp(getNodeHealthCheck(), "200") == 0)
-    {
-        status = 1;
-        nodePaths[selectedNodeIndex].status = true;
-    }
-    else
-    {
-        nodePaths[selectedNodeIndex].status = false;
-    }
-    free(buff_response);
-    return status;
-}
-
-const char *DeSoLib::getExchangeRates()
-{
-    return getRequest(ExchangeRateRoute);
-}
-
-int DeSoLib::updateExchangeRates()
-{
-    int status = 0;
-    DynamicJsonDocument doc(1024);
-    buff_response = (char *)malloc(MAX_RESPONSE_SIZE);
-    const char *payload = getExchangeRates();
-    // debug_print(payload);
-    DeserializationError error = deserializeJson(doc, payload);
-    free(buff_response);
-    if (!error)
-    {
-        USDCentsPerBitCloutExchangeRate = doc["USDCentsPerBitCloutExchangeRate"];
-        if (USDCentsPerBitCloutExchangeRate == 0)
-        {
-            USDCentsPerBitCloutExchangeRate = doc["USDCentsPerDeSoExchangeRate"]; // api changed
-        }
-        USDCentsPerBitcoinExchangeRate = doc["USDCentsPerBitcoinExchangeRate"];
-        status = 1;
-    }
-    doc.garbageCollect();
-    return status;
-}
 const char *DeSoLib::getSingleProfile(const char *messagePayload)
 {
     return postRequest(RoutePathGetSingleProfile, messagePayload);
@@ -402,10 +411,10 @@ int DeSoLib::countPostAssociation(const char *transactorPublicKeyBase58Check, co
     filter["Counts"]["SAD"] = true;
     filter["Counts"]["ANGRY"] = true;
     filter["Total"] = true;
-  
+
     DeserializationError error = deserializeJson(doc, https->getStream(), DeserializationOption::Filter(filter));
     https->end();
-    //serializeJsonPretty(doc, Serial);
+    // serializeJsonPretty(doc, Serial);
     if (doc.isNull())
     {
         serializeJsonPretty(doc, Serial);
@@ -432,8 +441,7 @@ int DeSoLib::countPostAssociation(const char *transactorPublicKeyBase58Check, co
     return status;
 }
 
-
-int DeSoLib::countPostAssociationSingle(const char *transactorPublicKeyBase58Check, const char *postHashHex,const char* associationValue, int* count)
+int DeSoLib::countPostAssociationSingle(const char *transactorPublicKeyBase58Check, const char *postHashHex, const char *associationValue, int *count)
 {
     int status = 0;
     static char postData[1024];
@@ -442,22 +450,22 @@ int DeSoLib::countPostAssociationSingle(const char *transactorPublicKeyBase58Che
     doc["PostHashHex"] = postHashHex;
     doc["AppPublicKeyBase58Check"] = "";
     doc["AssociationType"] = "REACTION";
-    //doc["AssociationTypePrefix"]="";
+    // doc["AssociationTypePrefix"]="";
     doc["AssociationValue"] = associationValue;
-    //doc["AssociationValuePrefix"]="";
+    // doc["AssociationValuePrefix"]="";
 
     serializeJson(doc, postData);
     doc.clear();
     HTTPClient *https = postRequestNew(CountPostAssociationsSingle, postData);
     if (https == NULL)
         return 0;
-    //Serial.println(https->getString());
+    // Serial.println(https->getString());
     DynamicJsonDocument filter(200);
     filter["Count"] = true;
-  
+
     DeserializationError error = deserializeJson(doc, https->getStream(), DeserializationOption::Filter(filter));
     https->end();
-    //serializeJsonPretty(doc, Serial);
+    // serializeJsonPretty(doc, Serial);
     if (doc.isNull())
     {
         serializeJsonPretty(doc, Serial);
@@ -1018,8 +1026,9 @@ int DeSoLib::updateTopHolders(const char *username, const char *PublicKeyBase58C
     return status;
 }
 
-int DeSoLib::getNFTEntriesForNFTPost(const char *postHashHex,int serialNumber, char *OwnerPublicKeyBase58Check){
-    
+int DeSoLib::getNFTEntriesForNFTPost(const char *postHashHex, int serialNumber, char *OwnerPublicKeyBase58Check)
+{
+
     int status = 0;
     char postData[1024];
     DynamicJsonDocument doc(ESP.getMaxAllocHeap() / 2 - 5000);
@@ -1034,7 +1043,7 @@ int DeSoLib::getNFTEntriesForNFTPost(const char *postHashHex,int serialNumber, c
     if (https == NULL)
         return 0;
     DynamicJsonDocument filter(100);
-    filter["NFTEntryResponses"]= true;
+    filter["NFTEntryResponses"] = true;
 
     // Deserialize the document
     DeserializationError error = deserializeJson(doc, https->getStream(), DeserializationOption::Filter(filter));
@@ -1046,7 +1055,7 @@ int DeSoLib::getNFTEntriesForNFTPost(const char *postHashHex,int serialNumber, c
     }
     if (!error)
     {
-        strncpy(OwnerPublicKeyBase58Check,doc["NFTEntryResponses"][serialNumber-1]["OwnerPublicKeyBase58Check"].as<const char*>(),56);
+        strncpy(OwnerPublicKeyBase58Check, doc["NFTEntryResponses"][serialNumber - 1]["OwnerPublicKeyBase58Check"].as<const char *>(), 56);
 
         status = 1;
     }
@@ -1056,7 +1065,6 @@ int DeSoLib::getNFTEntriesForNFTPost(const char *postHashHex,int serialNumber, c
     }
     doc.garbageCollect();
     return status;
-    
 }
 DeSoLib::~DeSoLib()
 {

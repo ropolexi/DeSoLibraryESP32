@@ -22,15 +22,34 @@ class DeSoLib
 public:
     WiFiClientSecure espClientSecure;
     DeSoLib();
+    //General Endpoints
     const char *RoutePathHealthCheck = "/api/v0/health-check";
     const char *ExchangeRateRoute = "/api/v0/get-exchange-rate";
-    const char *RoutePathGetSingleProfile = "/api/v0/get-single-profile";
+    const char *RoutePathGetAppState="/api/v0/get-app-state";
+
+    //User Endpoints
     const char *RoutePathGetUsersStateless = "/api/v0/get-users-stateless";
-    const char *RoutePathGetHodlersForPublicKey = "/api/v0/get-hodlers-for-public-key";
-    const char *RoutePathGetPostsForPublicKey = "/api/v0/get-posts-for-public-key";
-    const char *RoutePathGetSinglePost = "/api/v0/get-single-post";
-    const char *RoutePathGetBalance = "/api/v1/balance";
+    const char *RoutePathGetProfiles="/api/v0/get-profiles";
+    const char *RoutePathGetSingleProfile = "/api/v0/get-single-profile";
+
+    //Post Endpoints
     const char *RoutePathGetPostsStateless = "/api/v0/get-posts-stateless";
+    const char *RoutePathGetSinglePost = "/api/v0/get-single-post";
+    const char *RoutePathGetPostsForPublicKey = "/api/v0/get-posts-for-public-key";
+    const char *RoutePathGetHotFeed = "/api/v0/get-hot-feed";
+    const char *RoutePathGetDiamondedPosts="/api/v0/get-diamonded-posts";
+    const char *RoutePathGetLikesForPost="/api/v0/get-likes-for-post";
+    const char *RoutePathGetDiamondsForPost="/api/v0/get-diamonds-for-post";
+    const char *RoutePathGetRepostsForPost="/api/v0/get-reposts-for-post";
+    const char *RoutePathGetQuoteRepostsForPost="/api/v0/get-quote-reposts-for-post";
+    
+    
+    const char *RoutePathGetHodlersForPublicKey = "/api/v0/get-hodlers-for-public-key";
+    
+    
+    const char *RoutePathGetBalance = "/api/v1/balance";
+    
+    
     const char *CountPostAssociationsSingle = "/api/v0/post-associations/count";
     const char *CountPostAssociations = "/api/v0/post-associations/counts";
     const char *NFTEntriesForNFTPost = "/api/v0/get-nft-entries-for-nft-post";
@@ -104,6 +123,7 @@ public:
     double USDCentsPerBitcoinExchangeRate;
 
     int selectedNodeIndex = 0;
+    HTTPClient *getRequest(const char *apiPath);
     char *genLocaltime(time_t ts);
     void addNodePath(const char *url, const char *cert);
     int getMaxNodes();
@@ -111,11 +131,11 @@ public:
     char *getSelectedNodeUrl();
     bool getSelectedNodeStatus();
     void addFeed(const char *username, const char *body);
-    const char *getRequest(const char *apiPath);
+
     const char *postRequest(const char *apiPath, const char *data);
-    const char *getNodeHealthCheck();
+    //const char *getNodeHealthCheck();
     int updateNodeHealthCheck();
-    const char *getExchangeRates();
+    //const char *getExchangeRates();
     int updateExchangeRates();
     const char *getSingleProfile(const char *messagePayload);
     int updateSingleProfile(const char *username, const char *PublicKeyBase58Check, Profile *prof);
@@ -139,9 +159,6 @@ public:
     HTTPClient *postRequestNew(const char *apiPath, const char *data);
     int updatePostsStatelessSave(const char *postHashHex, const char *readerPublicKeyBase58Check,bool getPostsForFollowFeed, int numToFetch, bool getPostsForGlobalWhitelist, int postsByDESOMinutesLookback);
     void getFeed(int index,char *username,char *body);
-    //const char *getSinglePost(const char *messagePayload);
-    //const char *updateSinglePost(const char *PostHashHex, bool FetchParents, int CommentOffset, int CommentLimit, const char *ReaderPublicKeyBase58Check,Profile *prof);
-    //const char *getComments(const char *PostHashHex,int CommentOffset,int CommentLimit);
     void addUser(const char *username);
     void eraseUsers();
     int countPostAssociation(const char* transactorPublicKeyBase58Check, const char* postHashHex, ReactionCount* reactionCount);
