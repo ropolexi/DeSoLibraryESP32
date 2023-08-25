@@ -186,7 +186,6 @@ public:
     void clearTopHodlersUserNames(Profile *prof);
     int updateSinglePost(const char *postHashHex, bool fetchParents, int commentOffset, int commentLimit, const char *readerPublicKeyBase58Check,bool addGlobalFeedBool, Post *post);
     int updateLastNumPostsForPublicKey(const char *PublicKeysBase58Check, int NumToFetch, Profile *prof);
-    const char *getUserBalance(const char *messagePayload);
     int updateUsersBalance(const char *PublicKeysBase58Check, Profile *prof);
     const char *getPostsStateless(const char *messagePayload);
     int updatePostsStateless(const char *postHashHex, const char *readerPublicKeyBase58Check, int numToFetch, bool getPostsForGlobalWhitelist, long timePeriod);

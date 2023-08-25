@@ -57,7 +57,7 @@ int DeSoLib::updateNodeHealthCheck()
         nodePaths[selectedNodeIndex].status = false;
         return 0;
     }
-    snprintf(buff_small_1,sizeof(buff_small_1),client->getString().c_str());
+    snprintf(buff_small_1, sizeof(buff_small_1), client->getString().c_str());
     if (strcmp(buff_small_1, "200") == 0)
     {
         status = 1;
@@ -78,12 +78,12 @@ int DeSoLib::updateExchangeRates()
     DynamicJsonDocument doc(ESP.getMaxAllocHeap() / 2 - 5000);
 
     HTTPClient *client = getRequest(ExchangeRateRoute);
-    if(client==NULL)
+    if (client == NULL)
         return 0;
 
     DynamicJsonDocument filter(300);
     filter["USDCentsPerBitCloutExchangeRate"] = true;
-    filter["USDCentsPerDeSoExchangeRate"]= true;
+    filter["USDCentsPerDeSoExchangeRate"] = true;
     filter["USDCentsPerBitcoinExchangeRate"] = true;
 
     // Deserialize the document
@@ -92,29 +92,31 @@ int DeSoLib::updateExchangeRates()
 
     if (doc.isNull())
         return 0;
-    
+
     if (!error)
     {
         JsonVariant value;
-        value =doc["USDCentsPerBitCloutExchangeRate"];
-        if(!value.isNull())
+        value = doc["USDCentsPerBitCloutExchangeRate"];
+        if (!value.isNull())
             USDCentsPerBitCloutExchangeRate = value.as<double>();
         if (USDCentsPerBitCloutExchangeRate == 0)
         {
-            value =doc["USDCentsPerDeSoExchangeRate"];
-            if(!value.isNull())
+            value = doc["USDCentsPerDeSoExchangeRate"];
+            if (!value.isNull())
                 USDCentsPerBitCloutExchangeRate = value.as<double>(); // api changed
         }
-        value =doc["USDCentsPerBitcoinExchangeRate"];
-        if(!value.isNull())
+        value = doc["USDCentsPerBitcoinExchangeRate"];
+        if (!value.isNull())
             USDCentsPerBitcoinExchangeRate = value.as<double>();
         status = 1;
-    }else{
-        #if(DEBUG_LOG==true)
-            serializeJsonPretty(doc, Serial);
-        #endif
     }
-        
+    else
+    {
+#if (DEBUG_LOG == true)
+        serializeJsonPretty(doc, Serial);
+#endif
+    }
+
     doc.garbageCollect();
     return status;
 }
@@ -153,7 +155,8 @@ HTTPClient *DeSoLib::postRequest(const char *apiPath, const char *data)
     return NULL;
 }
 
-int DeSoLib::getAppState(){
+int DeSoLib::getAppState()
+{
     int status = 0;
     DynamicJsonDocument doc(ESP.getMaxAllocHeap() / 2 - 5000);
     HTTPClient *client = postRequest(RoutePathGetAppState, "{}");
@@ -271,15 +274,13 @@ int DeSoLib::updateSingleProfile(const char *username, const char *PublicKeyBase
     }
     if (!error)
     {
-        strlcpy(buff_small_2, doc["Profile"]["Username"] | "0", sizeof(buff_small_2));
-        if (strcmp(buff_small_2, "0") != 0)
+        JsonVariant value = doc["Profile"]["Username"];
+        if (!value.isNull())
         {
-            strncpy(prof->Username, doc["Profile"]["Username"], sizeof(prof->Username));
+            snprintf(prof->Username, sizeof(prof->Username), value.as<const char *>());
             prof->CoinPriceBitCloutNanos = doc["Profile"]["CoinPriceBitCloutNanos"];
             if (prof->CoinPriceBitCloutNanos == 0)
-            {
                 prof->CoinPriceBitCloutNanos = doc["Profile"]["CoinPriceDeSoNanos"];
-            }
             prof->CoinsInCirculationNanos = doc["Profile"]["CoinEntry"]["CoinsInCirculationNanos"];
             strcpy(prof->PublicKeyBase58Check, doc["Profile"]["PublicKeyBase58Check"]);
             status = 1;
@@ -516,20 +517,20 @@ int DeSoLib::updateLastNumPostsForPublicKey(const char *PublicKeysBase58Check, i
 int DeSoLib::updateUsersBalance(const char *PublicKeysBase58Check, Profile *prof)
 {
     int status = 0;
-    
+
     DynamicJsonDocument doc(ESP.getMaxAllocHeap() / 2 - 5000);
     doc["PublicKeyBase58Check"] = PublicKeysBase58Check;
     serializeJson(doc, buff_large);
     doc.clear();
     HTTPClient *client = postRequest(RoutePathGetBalance, buff_large);
-    if(client==NULL)
+    if (client == NULL)
         return 0;
     JsonStreamingParser parser;
     Listener listener;
     parser.setListener(&listener);
     String key;
     String value;
-    while (client->getStream().available()>0)
+    while (client->getStream().available() > 0)
     {
         listener.keyFound = false;
         listener.valueFound = false;
@@ -751,7 +752,7 @@ HTTPClient *DeSoLib::updateHodlersForPublicKey(const char *PublicKeyBase58Check,
     doc["FetchAll"] = FetchAll;
     // serializeJsonPretty(doc, Serial);
     serializeJson(doc, buff_large);
-    //Serial.println(buff_large);
+    // Serial.println(buff_large);
     doc.clear();
     doc.garbageCollect();
     return postRequest(RoutePathGetHodlersForPublicKey, buff_large);
@@ -795,7 +796,7 @@ int DeSoLib::updateHodleAssetBalance(const char *username, const char *PublicKey
         first = false;
         strcpy(PreLastPublicKey, LastPublicKey);
 
-        HTTPClient *https = updateHodlersForPublicKey(PublicKeyBase58Check, username, LastPublicKey, 10, false, true, "", false, prof);
+        HTTPClient *https = updateHodlersForPublicKey(PublicKeyBase58Check, username, LastPublicKey, 20, false, true, "", false, prof);
         if (https == NULL)
             return 0;
         long heap_len = ESP.getMaxAllocHeap() / 2 - 5000;
@@ -808,7 +809,7 @@ int DeSoLib::updateHodleAssetBalance(const char *username, const char *PublicKey
             serializeJsonPretty(doc, Serial);
             return 0;
         }
-        //serializeJsonPretty(doc, Serial);
+        // serializeJsonPretty(doc, Serial);
         if (!error && !doc.isNull() && doc.containsKey("Hodlers"))
         {
             status = 1;
@@ -824,22 +825,22 @@ int DeSoLib::updateHodleAssetBalance(const char *username, const char *PublicKey
                 total_coins /= 1000000000.0;
                 double final_deso_value = pow(total_coins, bonding_curve_pow + 1) - pow((total_coins - bal), bonding_curve_pow + 1);
                 final_deso_value *= bonding_curve_gain / 3.0;
-#if DEBUG_LOG == true
 
                 char username[20];
                 if (save && final_deso_value > 0.0001)
                 {
-                    //strncpy(username, value["ProfileEntryResponse"]["Username"].as<const char *>(), sizeof(username) - 1);
-                    //username[sizeof(username) - 1] = '\0';
-                    snprintf(username,sizeof(username),"%s",value["ProfileEntryResponse"]["Username"].as<const char *>());
+                    // strncpy(username, value["ProfileEntryResponse"]["Username"].as<const char *>(), sizeof(username) - 1);
+                    // username[sizeof(username) - 1] = '\0';
+                    snprintf(username, sizeof(username), "%s", value["ProfileEntryResponse"]["Username"].as<const char *>());
                     addUser(username);
                 }
+#if DEBUG_LOG == true
                 if (final_deso_value > 0.0001)
                 {
-                    // Serial.print(value["ProfileEntryResponse"]["Username"].as<const char *>());
-                    // Serial.print(": ");
-                    // Serial.print((final_deso_value * USDCentsPerBitCloutExchangeRate) / 100.0);
-                    // Serial.printf(" (%f)\n", bal);
+                    Serial.print(value["ProfileEntryResponse"]["Username"].as<const char *>());
+                    Serial.print(": ");
+                    Serial.print((final_deso_value * USDCentsPerBitCloutExchangeRate) / 100.0);
+                    Serial.printf(" (%f)\n", bal);
                 }
 #endif
                 amount += final_deso_value;
