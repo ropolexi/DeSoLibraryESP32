@@ -94,6 +94,51 @@ public:
     {
         char username[20];
     };
+    
+    struct PostEntryResponse
+    {
+
+    };
+    struct CoinEntryResponse
+    {
+        uint64_t CreatorBasisPoints;        
+        uint64_t DeSoLockedNanos;           
+        uint64_t NumberOfHolders;           
+        uint64_t CoinsInCirculationNanos;  
+        uint64_t CoinWatermarkNanos;
+
+    };
+
+    struct DAOCoinEntryResponse
+    {
+        uint64_t NumberOfHolders;
+        uint64_t CoinsInCirculationNanos;
+        uint64_t MintingDisabled;
+        char *TransferRestrictionStatus;
+    };
+
+    struct BalanceEntryResponse
+    {
+
+    };
+    struct ProfileEntryResponse
+    {
+        char PublicKeyBase58Check[56];
+        char Username[20];
+        char Description[20];
+        bool IsHidden;
+        bool IsReserved;
+        bool IsVerified;
+        PostEntryResponse *Comments;
+        PostEntryResponse *PostEntryResponse;
+        CoinEntryResponse *CoinEntry;
+        DAOCoinEntryResponse *DAOCoinEntry;
+        uint64_t CoinPriceDeSoNanos;
+        BalanceEntryResponse *UsersThatHODL;
+        bool IsFeaturedTutorialWellKnownCreator;
+        bool IsFeaturedTutorialUpAndComingCreator;
+    };
+
     struct Profile
     {
         char PublicKeyBase58Check[56];
@@ -117,13 +162,18 @@ public:
  
     char buff_small_1[200];
     char buff_small_2[200];
-    //char buff_large[1024]; // heavy usage on web response
+    char buff_large[1024];
     char *buff_response;
     double USDCentsPerBitCloutExchangeRate;
     double USDCentsPerBitcoinExchangeRate;
 
     int selectedNodeIndex = 0;
     HTTPClient *getRequest(const char *apiPath);
+    int updateNodeHealthCheck();
+    int updateExchangeRates();
+    HTTPClient *postRequestNew(const char *apiPath, const char *data);
+    int getAppState();
+
     char *genLocaltime(time_t ts);
     void addNodePath(const char *url, const char *cert);
     int getMaxNodes();
@@ -133,13 +183,10 @@ public:
     void addFeed(const char *username, const char *body);
 
     const char *postRequest(const char *apiPath, const char *data);
-    //const char *getNodeHealthCheck();
-    int updateNodeHealthCheck();
-    //const char *getExchangeRates();
-    int updateExchangeRates();
-    const char *getSingleProfile(const char *messagePayload);
+
+    //const char *getSingleProfile(const char *messagePayload);
     int updateSingleProfile(const char *username, const char *PublicKeyBase58Check, Profile *prof);
-    const char *getUsersStateless(const char *messagePayload);
+    // const char *getUsersStateless(const char *messagePayload);
     const char *getHodlersForPublicKey(const char *messagePayload);
     int updateHodlersForPublicKey(const char *username, const char *PublicKeyBase58Check, int NumToFetch, Profile *prof);
     void clearTopHodlersUserNames(Profile *prof);
@@ -156,7 +203,7 @@ public:
                                           bool IsDAOCoin, bool FetchHodlings, const char *SortType, bool FetchAll, Profile *prof);
     int updateHodleAssetBalance(const char *username, const char *PublicKeyBase58Check,  Profile *prof,bool save=false);
     int updateTopHolders(const char *username, const char *PublicKeyBase58Check, int NumToFetch, Profile *prof);
-    HTTPClient *postRequestNew(const char *apiPath, const char *data);
+    
     int updatePostsStatelessSave(const char *postHashHex, const char *readerPublicKeyBase58Check,bool getPostsForFollowFeed, int numToFetch, bool getPostsForGlobalWhitelist, int postsByDESOMinutesLookback);
     void getFeed(int index,char *username,char *body);
     void addUser(const char *username);

@@ -118,6 +118,80 @@ int DeSoLib::updateExchangeRates()
     doc.garbageCollect();
     return status;
 }
+
+HTTPClient *DeSoLib::postRequestNew(const char *apiPath, const char *data)
+{
+    static HTTPClient https;
+    https.useHTTP10(true);
+    if (strcmp(nodePaths[selectedNodeIndex].caRootCert, ""))
+    {
+        espClientSecure.setCACert(nodePaths[selectedNodeIndex].caRootCert);
+    }
+    else
+    {
+        Serial.println("Selecting insecure method,not checking site authenticity");
+        espClientSecure.setInsecure();
+    }
+    snprintf(buff_small_1, sizeof(buff_small_1), "%s%s", nodePaths[selectedNodeIndex].url, apiPath);
+
+    if (https.begin(espClientSecure, buff_small_1))
+    {
+        https.addHeader("User-Agent", "Mozilla/5.0");
+        https.addHeader("Accept", "application/json");
+        https.addHeader("Content-Type", "application/json");
+        int httpCode = https.POST((uint8_t *)data, strlen(data));
+        if (httpCode > 0)
+        {
+            if (httpCode == HTTP_CODE_OK)
+            {
+                return &https;
+            }
+            else
+            {
+                debug_print(httpCode);
+            }
+        }
+        else
+        {
+            debug_print("http error ");
+        }
+    }
+    else
+    {
+        debug_print("server error ");
+    }
+
+    return NULL;
+}
+
+int DeSoLib::getAppState(){
+    int status = 0;
+    DynamicJsonDocument doc(ESP.getMaxAllocHeap() / 2 - 5000);
+    HTTPClient *client = postRequestNew(RoutePathGetAppState, "{}");
+    if (client == NULL)
+        return 0;
+    DeserializationError error = deserializeJson(doc, client->getStream());
+    client->end();
+    if (doc.isNull())
+    {
+        serializeJsonPretty(doc, Serial);
+        return 0;
+    }
+    if (!error)
+    {
+        serializeJsonPretty(doc, Serial);
+        status = 1;
+    }
+    else
+    {
+        debug_print("Json Error");
+    }
+
+    doc.garbageCollect();
+    status = 1;
+    return status;
+}
+
 void DeSoLib::addNodePath(const char *url, const char *cert)
 {
     Node n;
@@ -231,60 +305,16 @@ const char *DeSoLib::postRequest(const char *apiPath, const char *data)
     return buff_ptr;
 }
 
-HTTPClient *DeSoLib::postRequestNew(const char *apiPath, const char *data)
-{
-    static HTTPClient https;
-    https.useHTTP10(true);
-    if (strcmp(nodePaths[selectedNodeIndex].caRootCert, ""))
-    {
-        espClientSecure.setCACert(nodePaths[selectedNodeIndex].caRootCert);
-    }
-    else
-    {
-        Serial.println("Selecting insecure method,not checking site authenticity");
-        espClientSecure.setInsecure();
-    }
-    snprintf(buff_small_1, sizeof(buff_small_1), "%s%s", nodePaths[selectedNodeIndex].url, apiPath);
 
-    if (https.begin(espClientSecure, buff_small_1))
-    {
-        https.addHeader("User-Agent", "Mozilla/5.0");
-        https.addHeader("Accept", "application/json");
-        https.addHeader("Content-Type", "application/json");
-        int httpCode = https.POST((uint8_t *)data, strlen(data));
-        if (httpCode > 0)
-        {
-            if (httpCode == HTTP_CODE_OK)
-            {
-                return &https;
-            }
-            else
-            {
-                debug_print(httpCode);
-            }
-        }
-        else
-        {
-            debug_print("http error ");
-        }
-    }
-    else
-    {
-        debug_print("server error ");
-    }
 
-    return NULL;
-}
-
-const char *DeSoLib::getSingleProfile(const char *messagePayload)
-{
-    return postRequest(RoutePathGetSingleProfile, messagePayload);
-}
+// const char *DeSoLib::getSingleProfile(const char *messagePayload)
+// {
+//     return postRequest(RoutePathGetSingleProfile, messagePayload);
+// }
 
 int DeSoLib::updateSingleProfile(const char *username, const char *PublicKeyBase58Check, Profile *prof)
 {
     int status = 0;
-    static char postData[100];
     DynamicJsonDocument doc(ESP.getMaxAllocHeap() / 2 - 5000);
     if (strlen(username) > 0)
     {
@@ -295,9 +325,9 @@ int DeSoLib::updateSingleProfile(const char *username, const char *PublicKeyBase
         doc["PublicKeyBase58Check"] = PublicKeyBase58Check;
     }
 
-    serializeJson(doc, postData);
+    serializeJson(doc, buff_large);
     doc.clear();
-    HTTPClient *https = postRequestNew(RoutePathGetSingleProfile, postData);
+    HTTPClient *https = postRequestNew(RoutePathGetSingleProfile, buff_large);
     if (https == NULL)
         return 0;
     DynamicJsonDocument filter(300);
@@ -349,10 +379,10 @@ int DeSoLib::updateSingleProfile(const char *username, const char *PublicKeyBase
     return status;
 }
 
-const char *DeSoLib::getUsersStateless(const char *messagePayload)
-{
-    return postRequest(RoutePathGetUsersStateless, messagePayload);
-}
+// const char *DeSoLib::getUsersStateless(const char *messagePayload)
+// {
+//     return postRequest(RoutePathGetUsersStateless, messagePayload);
+// }
 
 const char *DeSoLib::getHodlersForPublicKey(const char *messagePayload)
 {
@@ -380,7 +410,6 @@ const char *DeSoLib::getSinglePost(const char *messagePayload)
 int DeSoLib::countPostAssociation(const char *transactorPublicKeyBase58Check, const char *postHashHex, ReactionCount *reactionCount)
 {
     int status = 0;
-    static char postData[1024];
     DynamicJsonDocument doc(ESP.getMaxAllocHeap() / 2 - 5000);
     doc["TransactorPublicKeyBase58Check"] = transactorPublicKeyBase58Check;
     doc["PostHashHex"] = postHashHex;
@@ -397,9 +426,9 @@ int DeSoLib::countPostAssociation(const char *transactorPublicKeyBase58Check, co
     doc["AssociationValues"][6] = "ANGRY";
     // doc["AssociationValuePrefix"]="";
 
-    serializeJson(doc, postData);
+    serializeJson(doc, buff_large);
     doc.clear();
-    HTTPClient *https = postRequestNew(CountPostAssociations, postData);
+    HTTPClient *https = postRequestNew(CountPostAssociations, buff_large);
     if (https == NULL)
         return 0;
     DynamicJsonDocument filter(200);
@@ -444,7 +473,6 @@ int DeSoLib::countPostAssociation(const char *transactorPublicKeyBase58Check, co
 int DeSoLib::countPostAssociationSingle(const char *transactorPublicKeyBase58Check, const char *postHashHex, const char *associationValue, int *count)
 {
     int status = 0;
-    static char postData[1024];
     DynamicJsonDocument doc(ESP.getMaxAllocHeap() / 2 - 5000);
     doc["TransactorPublicKeyBase58Check"] = transactorPublicKeyBase58Check;
     doc["PostHashHex"] = postHashHex;
@@ -454,9 +482,9 @@ int DeSoLib::countPostAssociationSingle(const char *transactorPublicKeyBase58Che
     doc["AssociationValue"] = associationValue;
     // doc["AssociationValuePrefix"]="";
 
-    serializeJson(doc, postData);
+    serializeJson(doc, buff_large);
     doc.clear();
-    HTTPClient *https = postRequestNew(CountPostAssociationsSingle, postData);
+    HTTPClient *https = postRequestNew(CountPostAssociationsSingle, buff_large);
     if (https == NULL)
         return 0;
     // Serial.println(https->getString());
@@ -487,7 +515,6 @@ int DeSoLib::countPostAssociationSingle(const char *transactorPublicKeyBase58Che
 int DeSoLib::updateSinglePost(const char *postHashHex, bool fetchParents, int commentOffset, int commentLimit, const char *readerPublicKeyBase58Check, bool addGlobalFeedBool, Post *post)
 {
     int status = 0;
-    static char postData[1024];
     DynamicJsonDocument doc(ESP.getMaxAllocHeap() / 2 - 5000);
     strlen(postHashHex) > 0 ? doc["PostHashHex"] = postHashHex : doc["PostHashHex"] = "";
     doc["FetchParents"] = fetchParents;
@@ -495,9 +522,9 @@ int DeSoLib::updateSinglePost(const char *postHashHex, bool fetchParents, int co
     doc["CommentLimit"] = commentLimit;
     strlen(readerPublicKeyBase58Check) > 0 ? doc["ReaderPublicKeyBase58Check"] = readerPublicKeyBase58Check : doc["ReaderPublicKeyBase58Check"] = "";
     doc["AddGlobalFeedBool"] = addGlobalFeedBool;
-    serializeJson(doc, postData);
+    serializeJson(doc, buff_large);
     doc.clear();
-    HTTPClient *https = postRequestNew(RoutePathGetSinglePost, postData);
+    HTTPClient *https = postRequestNew(RoutePathGetSinglePost, buff_large);
     if (https == NULL)
         return 0;
     // Serial.println(payload);
@@ -539,15 +566,14 @@ int DeSoLib::updateSinglePost(const char *postHashHex, bool fetchParents, int co
 int DeSoLib::updateLastNumPostsForPublicKey(const char *PublicKeysBase58Check, int NumToFetch, Profile *prof)
 {
     int status = 0;
-    static char postData[100];
     long mem = ESP.getMaxAllocHeap() / 2 - 5000;
     // Serial.printf("Free Memory:%ld Bytes\n",mem);
     DynamicJsonDocument doc(mem);
     doc["PublicKeyBase58Check"] = PublicKeysBase58Check;
     doc["NumToFetch"] = NumToFetch;
-    serializeJson(doc, postData);
+    serializeJson(doc, buff_large);
     doc.clear();
-    HTTPClient *https = postRequestNew(RoutePathGetPostsForPublicKey, postData);
+    HTTPClient *https = postRequestNew(RoutePathGetPostsForPublicKey, buff_large);
     if (https == NULL)
         return 0;
     DynamicJsonDocument filter(200);
@@ -603,13 +629,13 @@ const char *DeSoLib::getUserBalance(const char *messagePayload)
 int DeSoLib::updateUsersBalance(const char *PublicKeysBase58Check, Profile *prof)
 {
     int status = 0;
-    static char postData[100];
+    
     DynamicJsonDocument doc(ESP.getMaxAllocHeap() / 2 - 5000);
     doc["PublicKeyBase58Check"] = PublicKeysBase58Check;
-    serializeJson(doc, postData);
+    serializeJson(doc, buff_large);
     doc.clear();
     buff_response = (char *)malloc(MAX_RESPONSE_SIZE);
-    const char *payload = getUserBalance(postData);
+    const char *payload = getUserBalance(buff_large);
 
     // Using JsonStreamingParser library to extract only needed data and to avoid UTXOs
     JsonStreamingParser parser;
@@ -664,7 +690,6 @@ char *DeSoLib::genLocaltime(time_t ts)
 int DeSoLib::updatePostsStateless(const char *postHashHex, const char *readerPublicKeyBase58Check, int numToFetch, bool getPostsForGlobalWhitelist, long timePeriod)
 {
     int status = 0;
-    char postData[1024];
     DynamicJsonDocument doc(ESP.getMaxAllocHeap() / 2 - 5000);
     if (strlen(postHashHex) > 0)
     {
@@ -682,9 +707,9 @@ int DeSoLib::updatePostsStateless(const char *postHashHex, const char *readerPub
     doc["PostsByDESOMinutesLookback"] = timePeriod / 60;
 
     doc["GetPostsForGlobalWhitelist"] = getPostsForGlobalWhitelist;
-    serializeJson(doc, postData);
+    serializeJson(doc, buff_large);
     doc.clear();
-    HTTPClient *https = postRequestNew(RoutePathGetPostsStateless, postData);
+    HTTPClient *https = postRequestNew(RoutePathGetPostsStateless, buff_large);
     if (https == NULL)
         return 0;
     DynamicJsonDocument filter(100);
@@ -732,7 +757,6 @@ int DeSoLib::updatePostsStateless(const char *postHashHex, const char *readerPub
 int DeSoLib::updatePostsStatelessSave(const char *postHashHex, const char *readerPublicKeyBase58Check, bool getPostsForFollowFeed, int numToFetch, bool getPostsForGlobalWhitelist, int postsByDESOMinutesLookback)
 {
     int status = 0;
-    char postData[1024];
     DynamicJsonDocument doc(ESP.getMaxAllocHeap() / 2 - 5000);
     if (strlen(postHashHex) > 0)
     {
@@ -750,10 +774,10 @@ int DeSoLib::updatePostsStatelessSave(const char *postHashHex, const char *reade
     doc["PostsByDESOMinutesLookback"] = postsByDESOMinutesLookback;
 
     doc["GetPostsForGlobalWhitelist"] = getPostsForGlobalWhitelist;
-    serializeJson(doc, postData);
+    serializeJson(doc, buff_large);
 
     doc.clear();
-    HTTPClient *https = postRequestNew(RoutePathGetPostsStateless, postData);
+    HTTPClient *https = postRequestNew(RoutePathGetPostsStateless, buff_large);
     if (https == NULL)
         return 0;
     DynamicJsonDocument filter(100);
@@ -833,7 +857,6 @@ HTTPClient *DeSoLib::updateHodlersForPublicKey(const char *PublicKeyBase58Check,
                                                const char *Username, const char *LastPublicKeyBase58Check, int NumToFetch,
                                                bool IsDAOCoin, bool FetchHodlings, const char *SortType, bool FetchAll, Profile *prof)
 {
-    static char postData[500];
     DynamicJsonDocument doc(500);
     if (strlen(PublicKeyBase58Check) > 1)
         doc["PublicKeyBase58Check"] = PublicKeyBase58Check;
@@ -848,11 +871,11 @@ HTTPClient *DeSoLib::updateHodlersForPublicKey(const char *PublicKeyBase58Check,
         doc["SortType"] = SortType;
     doc["FetchAll"] = FetchAll;
     // serializeJsonPretty(doc, Serial);
-    serializeJson(doc, postData);
+    serializeJson(doc, buff_large);
     // Serial.println(postData);
     doc.clear();
     doc.garbageCollect();
-    return postRequestNew(RoutePathGetHodlersForPublicKey, postData);
+    return postRequestNew(RoutePathGetHodlersForPublicKey, buff_large);
 }
 
 /**
@@ -1030,16 +1053,15 @@ int DeSoLib::getNFTEntriesForNFTPost(const char *postHashHex, int serialNumber, 
 {
 
     int status = 0;
-    char postData[1024];
     DynamicJsonDocument doc(ESP.getMaxAllocHeap() / 2 - 5000);
     if (strlen(postHashHex) > 0)
     {
         doc["PostHashHex"] = postHashHex;
     }
-    serializeJson(doc, postData);
+    serializeJson(doc, buff_large);
 
     doc.clear();
-    HTTPClient *https = postRequestNew(NFTEntriesForNFTPost, postData);
+    HTTPClient *https = postRequestNew(NFTEntriesForNFTPost, buff_large);
     if (https == NULL)
         return 0;
     DynamicJsonDocument filter(100);
