@@ -130,7 +130,7 @@ public:
         bool IsReserved;
         bool IsVerified;
         PostEntryResponse *Comments;
-        PostEntryResponse *PostEntryResponse;
+        PostEntryResponse *postEntryResponse;
         CoinEntryResponse *CoinEntry;
         DAOCoinEntryResponse *DAOCoinEntry;
         uint64_t CoinPriceDeSoNanos;
@@ -171,7 +171,7 @@ public:
     HTTPClient *getRequest(const char *apiPath);
     int updateNodeHealthCheck();
     int updateExchangeRates();
-    HTTPClient *postRequestNew(const char *apiPath, const char *data);
+    HTTPClient *postRequest(const char *apiPath, const char *data);
     int getAppState();
 
     char *genLocaltime(time_t ts);
@@ -181,18 +181,10 @@ public:
     char *getSelectedNodeUrl();
     bool getSelectedNodeStatus();
     void addFeed(const char *username, const char *body);
-
-    const char *postRequest(const char *apiPath, const char *data);
-
-    //const char *getSingleProfile(const char *messagePayload);
     int updateSingleProfile(const char *username, const char *PublicKeyBase58Check, Profile *prof);
-    // const char *getUsersStateless(const char *messagePayload);
-    const char *getHodlersForPublicKey(const char *messagePayload);
     int updateHodlersForPublicKey(const char *username, const char *PublicKeyBase58Check, int NumToFetch, Profile *prof);
     void clearTopHodlersUserNames(Profile *prof);
-    const char *getSinglePost(const char *messagePayload);
     int updateSinglePost(const char *postHashHex, bool fetchParents, int commentOffset, int commentLimit, const char *readerPublicKeyBase58Check,bool addGlobalFeedBool, Post *post);
-    const char *getPostsForPublicKey(const char *messagePayload);
     int updateLastNumPostsForPublicKey(const char *PublicKeysBase58Check, int NumToFetch, Profile *prof);
     const char *getUserBalance(const char *messagePayload);
     int updateUsersBalance(const char *PublicKeysBase58Check, Profile *prof);
