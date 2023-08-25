@@ -35,6 +35,8 @@ void setup()
   deso.addNodePath("https://node.deso.org", GTS_Root_R1_caRootCert);
 
   deso.selectDefaultNode(0);
+  esp_sleep_enable_timer_wakeup(60000000ULL);
+  delay(100);
 }
 void nextServer()
 {
@@ -73,9 +75,16 @@ void loop()
       }else{
         Serial.println("Error");
       }
-      
-    }
-    delay(60000UL);
+      WiFi.disconnect(true);
+      Serial.flush();
+      esp_light_sleep_start();
+      WiFi.begin(ssid, wifi_pass);
+      while (!WiFi.isConnected())
+      {
+        delay(1000);
+        Serial.print(".");
+      }
+    
     nextServer();
   }
 }
