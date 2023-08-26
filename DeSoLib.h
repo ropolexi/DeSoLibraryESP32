@@ -50,9 +50,9 @@ public:
     const char *RoutePathGetBalance = "/api/v1/balance";
     
     
-    const char *CountPostAssociationsSingle = "/api/v0/post-associations/count";
-    const char *CountPostAssociations = "/api/v0/post-associations/counts";
-    const char *NFTEntriesForNFTPost = "/api/v0/get-nft-entries-for-nft-post";
+    const char *RoutePathCountPostAssociationsSingle = "/api/v0/post-associations/count";
+    const char *RoutePathCountPostAssociations = "/api/v0/post-associations/counts";
+    const char *RoutePathNFTEntriesForNFTPost = "/api/v0/get-nft-entries-for-nft-post";
 
     struct Node
     {

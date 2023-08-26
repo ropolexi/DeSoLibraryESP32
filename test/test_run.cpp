@@ -60,15 +60,15 @@ void setup()
   checkSuccess(deso.updateHodleAssetBalance("deso","",&profile1,false));
 
   int count=0;
-  Serial.printf("API :%s ", deso.CountPostAssociationsSingle);
+  Serial.printf("API :%s ", deso.RoutePathCountPostAssociationsSingle);
   checkSuccess(deso.countPostAssociationSingle(profile1.PublicKeyBase58Check,"dda17ba3ad2930dfe20a4f50329ef8158efb00e350d00b1b6e897da7897b7bba","LIKE",&count));
   
   DeSoLib::ReactionCount reactions;
-  Serial.printf("API :%s ", deso.CountPostAssociations);
+  Serial.printf("API :%s ", deso.RoutePathCountPostAssociations);
   checkSuccess(deso.countPostAssociation(profile1.PublicKeyBase58Check,"dda17ba3ad2930dfe20a4f50329ef8158efb00e350d00b1b6e897da7897b7bba",&reactions));
 
   char owner[56];
-  Serial.printf("API :%s ", deso.NFTEntriesForNFTPost);
+  Serial.printf("API :%s ", deso.RoutePathNFTEntriesForNFTPost);
   checkSuccess(deso.getNFTEntriesForNFTPost("1de6f37e03b7da18a7a79b927a5716fe6c1913b1fd7fe51d21d3b2f963aa7a47",1,owner));
  
 

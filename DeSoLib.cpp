@@ -330,7 +330,7 @@ int DeSoLib::countPostAssociation(const char *transactorPublicKeyBase58Check, co
 
     serializeJson(doc, buff_large);
     doc.clear();
-    HTTPClient *https = postRequest(CountPostAssociations, buff_large);
+    HTTPClient *https = postRequest(RoutePathCountPostAssociations, buff_large);
     if (https == NULL)
         return 0;
     DynamicJsonDocument filter(200);
@@ -384,7 +384,7 @@ int DeSoLib::countPostAssociationSingle(const char *transactorPublicKeyBase58Che
 
     serializeJson(doc, buff_large);
     doc.clear();
-    HTTPClient *https = postRequest(CountPostAssociationsSingle, buff_large);
+    HTTPClient *https = postRequest(RoutePathCountPostAssociationsSingle, buff_large);
     if (https == NULL)
         return 0;
     DynamicJsonDocument filter(200);
@@ -949,7 +949,7 @@ int DeSoLib::getNFTEntriesForNFTPost(const char *postHashHex, int serialNumber, 
     serializeJson(doc, buff_large);
 
     doc.clear();
-    HTTPClient *https = postRequest(NFTEntriesForNFTPost, buff_large);
+    HTTPClient *https = postRequest(RoutePathNFTEntriesForNFTPost, buff_large);
     if (https == NULL)
         return 0;
     DynamicJsonDocument filter(100);
