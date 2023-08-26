@@ -7,7 +7,7 @@
 #include "JsonListener.h"
 #include "Parser.h"
 
-#define DEBUG_LOG true
+#define DEBUG_LOG false
 
 DeSoLib::DeSoLib()
 {
@@ -171,7 +171,9 @@ int DeSoLib::getAppState()
     }
     if (!error)
     {
+        #if(DEBUG_LOG==true)
         serializeJsonPretty(doc, Serial);
+        #endif
         status = 1;
     }
     else
@@ -566,7 +568,9 @@ char *DeSoLib::genLocaltime(time_t ts)
     ts_str[strlen(ts_str) - 1] = '\0';
     return ts_str;
 }
-
+/*
+timePeriod in seconds
+*/
 int DeSoLib::updatePostsStateless(const char *postHashHex, const char *readerPublicKeyBase58Check, int numToFetch, bool getPostsForGlobalWhitelist, long timePeriod)
 {
     int status = 0;
@@ -619,6 +623,7 @@ int DeSoLib::updatePostsStateless(const char *postHashHex, const char *readerPub
 
                 if (time(nullptr) - ts < timePeriod && time(nullptr) - ts > 0)
                 {
+
                     Serial.printf("\n[%s](%s) %s\n", genLocaltime(ts), username.c_str(), body.c_str());
                 }
             }
