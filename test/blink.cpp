@@ -99,9 +99,9 @@ void loop()
           {
             Serial.println("Error");
           }
-          if(deso.updateUsersBalance(owner, &profile1)){
+          //if(deso.updateUsersBalance(owner, &profile1)){
             
-          }
+          //}
         }
         nextServer();
       }
