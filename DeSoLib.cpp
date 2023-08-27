@@ -7,7 +7,7 @@
 DeSoLib::DeSoLib()
 {
 }
-/** @brief HTTP GET request
+/** @brief HTTP GET request.
  *
  *  @param apiPath API path without the domain name
  *  @return HTTPClient pointer
@@ -47,7 +47,8 @@ HTTPClient *DeSoLib::getRequest(const char *apiPath)
     return NULL;
 }
 
-/** @brief get node health
+/** @brief get node health.
+ * 
  * This will update the node status in nodePaths[selectedNodeIndex]
  *  @param 
  *  @return status
@@ -76,7 +77,7 @@ int DeSoLib::updateNodeHealthCheck()
     return status;
 }
 
-/** @brief Update the exchange rates
+/** @brief Update the exchange rates.
  *
  *  @param 
  *  @return status
@@ -130,6 +131,12 @@ int DeSoLib::updateExchangeRates()
     return status;
 }
 
+/** @brief HTTP POST request.
+ *
+ *  @param apiPath API path without the domain name
+ *  @param data Post data
+ *  @return HTTPClient pointer
+ */
 HTTPClient *DeSoLib::postRequest(const char *apiPath, const char *data)
 {
     static HTTPClient https;
@@ -164,6 +171,11 @@ HTTPClient *DeSoLib::postRequest(const char *apiPath, const char *data)
     return NULL;
 }
 
+/** @brief Node app state.
+ *  This will printout app status when DEBUG_LOG=true
+ *  @param 
+ *  @return status
+ */
 int DeSoLib::getAppState()
 {
     int status = 0;
@@ -195,6 +207,12 @@ int DeSoLib::getAppState()
     return status;
 }
 
+/** @brief Add a node path
+ *  
+ *  @param url Domain name of the node
+ *  @param cert Root certificate of the domain
+ *  @return 
+ */
 void DeSoLib::addNodePath(const char *url, const char *cert)
 {
     Node n;
@@ -202,6 +220,12 @@ void DeSoLib::addNodePath(const char *url, const char *cert)
     n.caRootCert = cert;
     nodePaths.push_back(n);
 }
+
+/** @brief Get maximum nodes added
+ *  
+ *  @param 
+ *  @return Maximum number of nodes
+ */
 int DeSoLib::getMaxNodes()
 {
     return nodePaths.size();
