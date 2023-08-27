@@ -3,11 +3,6 @@
 #include <HTTPClient.h>
 #include "ArduinoJson.h"
 #include "math.h"
-#include "JsonStreamingParser.h"
-#include "JsonListener.h"
-#include "Parser.h"
-
-#define DEBUG_LOG false
 
 DeSoLib::DeSoLib()
 {
@@ -263,6 +258,7 @@ int DeSoLib::updateSingleProfile(const char *username, const char *PublicKeyBase
     filter["Profile"]["CoinPriceDeSoNanos"] = true;
     filter["Profile"]["CoinEntry"]["CoinsInCirculationNanos"] = true;
     filter["Profile"]["PublicKeyBase58Check"] = true;
+    filter["Profile"]["DESOBalanceNanos"]=true;
 
     // Deserialize the document
     DeserializationError error = deserializeJson(doc, https->getStream(), DeserializationOption::Filter(filter));
@@ -285,6 +281,7 @@ int DeSoLib::updateSingleProfile(const char *username, const char *PublicKeyBase
                 prof->CoinPriceBitCloutNanos = doc["Profile"]["CoinPriceDeSoNanos"];
             prof->CoinsInCirculationNanos = doc["Profile"]["CoinEntry"]["CoinsInCirculationNanos"];
             strcpy(prof->PublicKeyBase58Check, doc["Profile"]["PublicKeyBase58Check"]);
+            prof->BalanceNanos=doc["Profile"]["DESOBalanceNanos"].as<double>();
             status = 1;
         }
         else
@@ -515,13 +512,14 @@ int DeSoLib::updateLastNumPostsForPublicKey(const char *PublicKeysBase58Check, i
     doc.garbageCollect();
     return status;
 }
-
+/*
 int DeSoLib::updateUsersBalance(const char *PublicKeysBase58Check, Profile *prof)
 {
     int status = 0;
 
     DynamicJsonDocument doc(ESP.getMaxAllocHeap() / 2 - 5000);
     doc["PublicKeyBase58Check"] = PublicKeysBase58Check;
+    doc["Confirmations"] = 3;
     serializeJson(doc, buff_large);
     doc.clear();
     HTTPClient *client = postRequest(RoutePathGetBalance, buff_large);
@@ -536,7 +534,9 @@ int DeSoLib::updateUsersBalance(const char *PublicKeysBase58Check, Profile *prof
     {
         listener.keyFound = false;
         listener.valueFound = false;
-        parser.parse(client->getStream().read());
+        char ch=client->getStream().read();
+        Serial.print(ch);
+        parser.parse(ch);
 
         if (listener.keyFound)
         {
@@ -559,7 +559,7 @@ int DeSoLib::updateUsersBalance(const char *PublicKeysBase58Check, Profile *prof
     doc.garbageCollect();
     return status;
 }
-
+*/
 char *DeSoLib::genLocaltime(time_t ts)
 {
     struct tm *info;

@@ -42,14 +42,8 @@ public:
     const char *RoutePathGetDiamondsForPost="/api/v0/get-diamonds-for-post";
     const char *RoutePathGetRepostsForPost="/api/v0/get-reposts-for-post";
     const char *RoutePathGetQuoteRepostsForPost="/api/v0/get-quote-reposts-for-post";
-    
-    
+
     const char *RoutePathGetHodlersForPublicKey = "/api/v0/get-hodlers-for-public-key";
-    
-    
-    const char *RoutePathGetBalance = "/api/v1/balance";
-    
-    
     const char *RoutePathCountPostAssociationsSingle = "/api/v0/post-associations/count";
     const char *RoutePathCountPostAssociations = "/api/v0/post-associations/counts";
     const char *RoutePathNFTEntriesForNFTPost = "/api/v0/get-nft-entries-for-nft-post";
@@ -143,7 +137,7 @@ public:
     void clearTopHodlersUserNames(Profile *prof);
     int updateSinglePost(const char *postHashHex, bool fetchParents, int commentOffset, int commentLimit, const char *readerPublicKeyBase58Check,bool addGlobalFeedBool, Post *post);
     int updateLastNumPostsForPublicKey(const char *PublicKeysBase58Check, int NumToFetch, Profile *prof);
-    int updateUsersBalance(const char *PublicKeysBase58Check, Profile *prof);
+    //int updateUsersBalance(const char *PublicKeysBase58Check, Profile *prof);
     int updatePostsStateless(const char *postHashHex, const char *readerPublicKeyBase58Check, int numToFetch, bool getPostsForGlobalWhitelist, long timePeriod);
     HTTPClient *updateHodlersForPublicKey(const char *PublicKeyBase58Check,
                                           const char *Username, const char *LastPublicKeyBase58Check, int NumToFetch,
