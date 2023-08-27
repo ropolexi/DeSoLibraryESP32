@@ -7,7 +7,11 @@
 DeSoLib::DeSoLib()
 {
 }
-
+/** @brief HTTP GET request
+ *
+ *  @param apiPath API path without the domain name
+ *  @return HTTPClient pointer
+ */
 HTTPClient *DeSoLib::getRequest(const char *apiPath)
 {
     static HTTPClient https;
@@ -43,6 +47,11 @@ HTTPClient *DeSoLib::getRequest(const char *apiPath)
     return NULL;
 }
 
+/** @brief get node health
+ * This will update the node status in nodePaths[selectedNodeIndex]
+ *  @param 
+ *  @return status
+ */
 int DeSoLib::updateNodeHealthCheck()
 {
     int status = 0;
@@ -67,6 +76,11 @@ int DeSoLib::updateNodeHealthCheck()
     return status;
 }
 
+/** @brief Update the exchange rates
+ *
+ *  @param 
+ *  @return status
+ */
 int DeSoLib::updateExchangeRates()
 {
     int status = 0;
