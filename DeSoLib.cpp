@@ -576,6 +576,13 @@ int DeSoLib::updateSinglePost(const char *postHashHex, bool fetchParents, int co
     return status;
 }
 
+/** @brief Update Last Num Posts For PublicKey
+ *  
+ *  @param PublicKeysBase58Check  PublicKeysBase58Check
+ *  @param NumToFetch int NumToFetch
+ *  @param prof Profile *prof
+ *  @return status
+ */
 int DeSoLib::updateLastNumPostsForPublicKey(const char *PublicKeysBase58Check, int NumToFetch, Profile *prof)
 {
     int status = 0;
@@ -679,6 +686,12 @@ int DeSoLib::updateUsersBalance(const char *PublicKeysBase58Check, Profile *prof
     return status;
 }
 */
+
+/** @brief generate localtime
+ *  
+ *  @param ts  time_t ts
+ *  @return timestamp char pointer
+ */
 char *DeSoLib::genLocaltime(time_t ts)
 {
     struct tm *info;
@@ -687,9 +700,16 @@ char *DeSoLib::genLocaltime(time_t ts)
     ts_str[strlen(ts_str) - 1] = '\0';
     return ts_str;
 }
-/*
-timePeriod in seconds
-*/
+
+/** @brief Update Posts Stateless
+ *  
+ *  @param postHashHex  const char *postHashHex
+ *  @param readerPublicKeyBase58Check  const char *readerPublicKeyBase58Check
+ *  @param numToFetchts  int numToFetch
+ *  @param getPostsForGlobalWhitelist  bool getPostsForGlobalWhitelist
+ *  @param timePeriod  long timePeriod in seconds
+ *  @return status
+ */
 int DeSoLib::updatePostsStateless(const char *postHashHex, const char *readerPublicKeyBase58Check, int numToFetch, bool getPostsForGlobalWhitelist, long timePeriod)
 {
     int status = 0;
@@ -758,6 +778,16 @@ int DeSoLib::updatePostsStateless(const char *postHashHex, const char *readerPub
     return status;
 }
 
+/** @brief Update Posts Stateless Save
+ *  
+ *  @param postHashHex  const char *postHashHex
+ *  @param readerPublicKeyBase58Check  const char *readerPublicKeyBase58Check
+ *  @param getPostsForFollowFeed bool getPostsForFollowFeed
+ *  @param numToFetchts  int numToFetch
+ *  @param getPostsForGlobalWhitelist  bool getPostsForGlobalWhitelist
+ *  @param postsByDESOMinutesLookback  int postsByDESOMinutesLookback
+ *  @return status
+ */
 int DeSoLib::updatePostsStatelessSave(const char *postHashHex, const char *readerPublicKeyBase58Check, bool getPostsForFollowFeed, int numToFetch, bool getPostsForGlobalWhitelist, int postsByDESOMinutesLookback)
 {
     int status = 0;
@@ -843,18 +873,19 @@ int DeSoLib::updatePostsStatelessSave(const char *postHashHex, const char *reade
     return status;
 }
 
-/**
+/** @brief Ppdate Hodlers For PublicKey 
  *
- * @param PublicKeyBase58Check
- * @param Username
- * @param LastPublicKeyBase58Check
- * @param NumToFetch
- * @param IsDAOCoin
- * @param FetchHodlings
- * @param SortType
- * @param FetchAll
+ * @param PublicKeyBase58Check const char *PublicKeyBase58Check
+ * @param Username const char *Username
+ * @param LastPublicKeyBase58Check const char *LastPublicKeyBase58Check
+ * @param NumToFetch int NumToFetch
+ * @param IsDAOCoin bool IsDAOCoin
+ * @param FetchHodlings bool FetchHodlings
+ * @param SortType const char *SortType "","coin_balance","wealth"
+ * @param FetchAll  bool FetchAll
+ * @param prof Profile *prof
  *
- * SortType - "","coin_balance","wealth"
+ * @return
  */
 
 HTTPClient *DeSoLib::updateHodlersForPublicKey(const char *PublicKeyBase58Check,
@@ -882,7 +913,7 @@ HTTPClient *DeSoLib::updateHodlersForPublicKey(const char *PublicKeyBase58Check,
     return postRequest(RoutePathGetHodlersForPublicKey, buff_large);
 }
 
-/**
+/** @brief Update Hodle AssetBalance
  * Get user's total holdles value.
  * Retrieve 10 at a time to avoid memory issue
  * Get all hodle creator coins and get actual sell values from bonding curve.
@@ -989,6 +1020,13 @@ int DeSoLib::updateHodleAssetBalance(const char *username, const char *PublicKey
     return status;
 }
 
+/** @brief Update Top Holders
+ * @param username Username.
+ * @param PublicKeyBase58Check Publickey
+ * @param NumToFetch int NumToFetch
+ * @param prof User profile
+ * @return status
+ */
 int DeSoLib::updateTopHolders(const char *username, const char *PublicKeyBase58Check, int NumToFetch, Profile *prof)
 {
     int status = 0;
@@ -1056,6 +1094,12 @@ int DeSoLib::updateTopHolders(const char *username, const char *PublicKeyBase58C
     return status;
 }
 
+/** @brief getNFTEntriesForNFTPost
+ *  @param postHashHex const char *postHashHex
+ *  @param serialNumber int serialNumber
+ *  @param OwnerPublicKeyBase58Check  char *OwnerPublicKeyBase58Check
+ *  @return status
+ */
 int DeSoLib::getNFTEntriesForNFTPost(const char *postHashHex, int serialNumber, char *OwnerPublicKeyBase58Check)
 {
 
