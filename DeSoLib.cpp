@@ -231,19 +231,42 @@ int DeSoLib::getMaxNodes()
     return nodePaths.size();
 }
 
+/** @brief Select default node to connect
+ *  
+ *  @param index index of the node on the list
+ *  @return 
+ */
 void DeSoLib::selectDefaultNode(int index)
 {
     selectedNodeIndex = index;
 }
+
+/** @brief Get selected node URL
+ *  
+ *  @param 
+ *  @return Node URL
+ */
 char *DeSoLib::getSelectedNodeUrl()
 {
     return nodePaths[selectedNodeIndex].url;
 }
+
+/** @brief Get selected node status
+ *  
+ *  @param
+ *  @return node status
+ */
 bool DeSoLib::getSelectedNodeStatus()
 {
     return nodePaths[selectedNodeIndex].status;
 }
 
+/** @brief Add feed to feeds list
+ *  
+ *  @param username Username
+ *  @param body Post body text
+ *  @return 
+ */
 void DeSoLib::addFeed(const char *username, const char *body)
 {
     Feed feed;
@@ -252,12 +275,23 @@ void DeSoLib::addFeed(const char *username, const char *body)
     feeds.push_back(feed);
 }
 
+/** @brief Add User to users list
+ *  
+ *  @param username Username
+ *  @return 
+ */
 void DeSoLib::addUser(const char *username)
 {
     Users user;
     strncpy(user.username, username, sizeof(user.username));
     users.push_back(user);
 }
+
+/** @brief Erase all users
+ *  
+ *  @param
+ *  @return 
+ */
 void DeSoLib::eraseUsers()
 {
     while (users.size() > 0)
@@ -266,12 +300,26 @@ void DeSoLib::eraseUsers()
     }
 }
 
+/** @brief Get feed post body
+ *  
+ *  @param index Post index
+ *  @param username Username
+ *  @param body Pointer to char array to retrieve body text
+ *  @return 
+ */
 void DeSoLib::getFeed(int index, char *username, char *body)
 {
     strncpy(username, feeds[index].username, sizeof(feeds[index].username));
     strncpy(body, feeds[index].body, sizeof(feeds[index].body));
 }
 
+/** @brief Get latest data from node and update single profile
+ *  
+ *  @param username Username
+ *  @param PublicKeyBase58Check public key
+ *  @param prof Pointer to profile
+ *  @return status
+ */
 int DeSoLib::updateSingleProfile(const char *username, const char *PublicKeyBase58Check, Profile *prof)
 {
     int status = 0;
@@ -339,6 +387,11 @@ int DeSoLib::updateSingleProfile(const char *username, const char *PublicKeyBase
     return status;
 }
 
+/** @brief Clear top holders usernames
+ *  
+ *  @param prof Pointer to profile
+ *  @return
+ */
 void DeSoLib::clearTopHodlersUserNames(Profile *prof)
 {
     for (int i = 0; i < sizeof(prof->TopHodlersUserNames[0]); i++)
@@ -347,6 +400,13 @@ void DeSoLib::clearTopHodlersUserNames(Profile *prof)
     }
 }
 
+/** @brief Count post association
+ *  
+ *  @param transactorPublicKeyBase58Check transactorPublicKeyBase58Check 
+ *  @param postHashHex postHashHex
+ *  @param reactionCount pointer to ReactionCount
+ *  @return status
+ */
 int DeSoLib::countPostAssociation(const char *transactorPublicKeyBase58Check, const char *postHashHex, ReactionCount *reactionCount)
 {
     int status = 0;
@@ -407,6 +467,14 @@ int DeSoLib::countPostAssociation(const char *transactorPublicKeyBase58Check, co
     return status;
 }
 
+/** @brief Count post association
+ *  
+ *  @param transactorPublicKeyBase58Check transactorPublicKeyBase58Check 
+ *  @param postHashHex postHashHex
+ *  @param associationValue Association value , example "LIKE" "DISLIKE" "LOVE" "SAD" "ANGRY" "ASTONISHED" "LAUGH"
+ *  @param count Pointer to returning count value
+ *  @return status
+ */
 int DeSoLib::countPostAssociationSingle(const char *transactorPublicKeyBase58Check, const char *postHashHex, const char *associationValue, int *count)
 {
     int status = 0;
@@ -445,6 +513,19 @@ int DeSoLib::countPostAssociationSingle(const char *transactorPublicKeyBase58Che
     status = 1;
     return status;
 }
+
+
+/** @brief Update single post
+ *  
+ *  @param postHashHex  postHashHex
+ *  @param fetchParents bool fetchParents
+ *  @param commentOffset int commentOffset
+ *  @param commentLimit int commentLimit
+ *  @param readerPublicKeyBase58Check const char *readerPublicKeyBase58Check
+ *  @param addGlobalFeedBool bool addGlobalFeedBool
+ *  @param post Post *post
+ *  @return status
+ */
 int DeSoLib::updateSinglePost(const char *postHashHex, bool fetchParents, int commentOffset, int commentLimit, const char *readerPublicKeyBase58Check, bool addGlobalFeedBool, Post *post)
 {
     int status = 0;
