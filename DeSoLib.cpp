@@ -948,9 +948,10 @@ HTTPClient *DeSoLib::updateHodlersForPublicKey(const char *PublicKeyBase58Check,
  * @param username Username.
  * @param PublicKeyBase58Check Publickey
  * @param prof User profile
+ * @param print_info bool value whether to print usernames with hodle value
  * @return status
  */
-int DeSoLib::updateHodleAssetBalance(const char *username, const char *PublicKeyBase58Check, Profile *prof, bool save)
+int DeSoLib::updateHodleAssetBalance(const char *username, const char *PublicKeyBase58Check, Profile *prof, bool save, bool print_info)
 {
     int status = 0;
     char PreLastPublicKey[56];
@@ -1012,15 +1013,15 @@ int DeSoLib::updateHodleAssetBalance(const char *username, const char *PublicKey
                     snprintf(username, sizeof(username), "%s", value["ProfileEntryResponse"]["Username"].as<const char *>());
                     addUser(username);
                 }
-#if DEBUG_LOG == true
-                if (final_deso_value > 0.0001)
+
+                if (print_info && final_deso_value > 0.0001)
                 {
                     Serial.print(value["ProfileEntryResponse"]["Username"].as<const char *>());
                     Serial.print(": ");
                     Serial.print((final_deso_value * USDCentsPerBitCloutExchangeRate) / 100.0);
                     Serial.printf(" (%f)\n", bal);
                 }
-#endif
+
                 amount += final_deso_value;
                 count++;
             }
