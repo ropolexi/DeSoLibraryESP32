@@ -21,7 +21,6 @@ HTTPClient *DeSoLib::getRequest(const char *apiPath)
     }
     else
     {
-        Serial.println("Selecting insecure method,not checking site authenticity");
         espClientSecure.setInsecure();
     }
     // https.addHeader("User-Agent", "Mozilla/5.0");
