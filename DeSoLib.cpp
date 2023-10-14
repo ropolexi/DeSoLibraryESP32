@@ -372,6 +372,7 @@ int DeSoLib::updateSingleProfile(const char *username, const char *PublicKeyBase
 
     // Deserialize the document
     DeserializationError error = deserializeJson(doc, https->getStream(), DeserializationOption::Filter(filter));
+    https->getString();
     https->end();
 
     if (doc.isNull())
@@ -463,6 +464,7 @@ int DeSoLib::countPostAssociation(const char *transactorPublicKeyBase58Check, co
     filter["Total"] = true;
 
     DeserializationError error = deserializeJson(doc, https->getStream(), DeserializationOption::Filter(filter));
+    https->getString();
     https->end();
     // serializeJsonPretty(doc, Serial);
     if (doc.isNull())
@@ -518,6 +520,7 @@ int DeSoLib::countPostAssociationSingle(const char *transactorPublicKeyBase58Che
     filter["Count"] = true;
 
     DeserializationError error = deserializeJson(doc, https->getStream(), DeserializationOption::Filter(filter));
+    https->getString();
     https->end();
     if (doc.isNull())
     {
@@ -574,6 +577,7 @@ int DeSoLib::updateSinglePost(const char *postHashHex, bool fetchParents, int co
     filter["PostFound"]["PostEntryReaderState"]["LikedByReader"] = true;
 
     DeserializationError error = deserializeJson(doc, https->getStream(), DeserializationOption::Filter(filter));
+    https->getString();
     https->end();
     if (doc.isNull())
     {
@@ -625,6 +629,7 @@ int DeSoLib::updateLastNumPostsForPublicKey(const char *PublicKeysBase58Check, i
 
     // Deserialize the document
     DeserializationError error = deserializeJson(doc, https->getStream(), DeserializationOption::Filter(filter));
+    https->getString();
     https->end();
     if (doc.isNull())
     {
@@ -765,6 +770,7 @@ int DeSoLib::updatePostsStateless(const char *postHashHex, const char *readerPub
 
     // Deserialize the document
     DeserializationError error = deserializeJson(doc, https->getStream(), DeserializationOption::Filter(filter));
+    https->getString();
     https->end();
     if (doc.isNull())
     {
@@ -844,6 +850,7 @@ int DeSoLib::updatePostsStatelessSave(const char *postHashHex, const char *reade
 
     // Deserialize the document
     DeserializationError error = deserializeJson(doc, https->getStream(), DeserializationOption::Filter(filter));
+    https->getString();
     https->end();
     // serializeJson(doc, Serial);
     if (doc.isNull())
@@ -982,6 +989,7 @@ int DeSoLib::updateHodleAssetBalance(const char *username, const char *PublicKey
         // Serial.printf("Free memory:%ld\n",heap_len);
         DynamicJsonDocument doc(heap_len);
         DeserializationError error = deserializeJson(doc, https->getStream(), DeserializationOption::Filter(filter));
+        https->getString();
         https->end();
         if (doc.isNull())
         {
@@ -1070,6 +1078,7 @@ int DeSoLib::updateTopHolders(const char *username, const char *PublicKeyBase58C
     // Deserialize the document
     DynamicJsonDocument doc(ESP.getMaxAllocHeap() / 2 - 5000);
     DeserializationError error = deserializeJson(doc, https->getStream(), DeserializationOption::Filter(filter));
+    https->getString();
     https->end();
     // free(buff_response);
     if (doc.isNull())
@@ -1144,6 +1153,7 @@ int DeSoLib::getNFTEntriesForNFTPost(const char *postHashHex, int serialNumber, 
 
     // Deserialize the document
     DeserializationError error = deserializeJson(doc, https->getStream(), DeserializationOption::Filter(filter));
+    https->getString();
     https->end();
     // serializeJson(doc, Serial);
     if (doc.isNull())
