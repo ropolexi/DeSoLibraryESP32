@@ -24,7 +24,8 @@ HTTPClient *DeSoLib::getRequest(const char *apiPath)
         Serial.println("Selecting insecure method,not checking site authenticity");
         espClientSecure.setInsecure();
     }
-    https.addHeader("User-Agent", "Mozilla/5.0");
+    // https.addHeader("User-Agent", "Mozilla/5.0");
+    https.setUserAgent("Mozilla/5.0");
     https.addHeader("Content-Type", "application/x-www-form-urlencoded");
     snprintf(buff_small_1, sizeof(buff_small_1), "%s%s", nodePaths[selectedNodeIndex].url, apiPath);
 
@@ -48,9 +49,9 @@ HTTPClient *DeSoLib::getRequest(const char *apiPath)
 }
 
 /** @brief get node health.
- * 
+ *
  * This will update the node status in nodePaths[selectedNodeIndex]
- *  @param 
+ *  @param
  *  @return status
  */
 int DeSoLib::updateNodeHealthCheck()
@@ -79,7 +80,7 @@ int DeSoLib::updateNodeHealthCheck()
 
 /** @brief Update the exchange rates.
  *
- *  @param 
+ *  @param
  *  @return status
  */
 int DeSoLib::updateExchangeRates()
@@ -149,7 +150,8 @@ HTTPClient *DeSoLib::postRequest(const char *apiPath, const char *data)
 
     if (https.begin(espClientSecure, buff_small_1))
     {
-        https.addHeader("User-Agent", "Mozilla/5.0");
+        // https.addHeader("User-Agent", "Mozilla/5.0");
+        https.setUserAgent("Mozilla/5.0");
         https.addHeader("Accept", "application/json");
         https.addHeader("Content-Type", "application/json");
         int httpCode = https.POST((uint8_t *)data, strlen(data));
@@ -173,7 +175,7 @@ HTTPClient *DeSoLib::postRequest(const char *apiPath, const char *data)
 
 /** @brief Node app state.
  *  This will printout app status when DEBUG_LOG=true
- *  @param 
+ *  @param
  *  @return status
  */
 int DeSoLib::getAppState()
@@ -192,9 +194,9 @@ int DeSoLib::getAppState()
     }
     if (!error)
     {
-        #if(DEBUG_LOG==true)
+#if (DEBUG_LOG == true)
         serializeJsonPretty(doc, Serial);
-        #endif
+#endif
         status = 1;
     }
     else
@@ -208,10 +210,10 @@ int DeSoLib::getAppState()
 }
 
 /** @brief Add a node path
- *  
+ *
  *  @param url Domain name of the node
  *  @param cert Root certificate of the domain
- *  @return 
+ *  @return
  */
 void DeSoLib::addNodePath(const char *url, const char *cert)
 {
@@ -222,8 +224,8 @@ void DeSoLib::addNodePath(const char *url, const char *cert)
 }
 
 /** @brief Get maximum nodes added
- *  
- *  @param 
+ *
+ *  @param
  *  @return Maximum number of nodes
  */
 int DeSoLib::getMaxNodes()
@@ -232,9 +234,9 @@ int DeSoLib::getMaxNodes()
 }
 
 /** @brief Select default node to connect
- *  
+ *
  *  @param index index of the node on the list
- *  @return 
+ *  @return
  */
 void DeSoLib::selectDefaultNode(int index)
 {
@@ -242,8 +244,8 @@ void DeSoLib::selectDefaultNode(int index)
 }
 
 /** @brief Get selected node URL
- *  
- *  @param 
+ *
+ *  @param
  *  @return Node URL
  */
 char *DeSoLib::getSelectedNodeUrl()
@@ -252,7 +254,7 @@ char *DeSoLib::getSelectedNodeUrl()
 }
 
 /** @brief Get selected node status
- *  
+ *
  *  @param
  *  @return node status
  */
@@ -262,10 +264,10 @@ bool DeSoLib::getSelectedNodeStatus()
 }
 
 /** @brief Add feed to feeds list
- *  
+ *
  *  @param username Username
  *  @param body Post body text
- *  @return 
+ *  @return
  */
 void DeSoLib::addFeed(const char *username, const char *body)
 {
@@ -276,9 +278,9 @@ void DeSoLib::addFeed(const char *username, const char *body)
 }
 
 /** @brief Add User to users list
- *  
+ *
  *  @param username Username
- *  @return 
+ *  @return
  */
 void DeSoLib::addUser(const char *username)
 {
@@ -288,9 +290,9 @@ void DeSoLib::addUser(const char *username)
 }
 
 /** @brief Erase all users
- *  
+ *
  *  @param
- *  @return 
+ *  @return
  */
 void DeSoLib::eraseUsers()
 {
@@ -301,11 +303,11 @@ void DeSoLib::eraseUsers()
 }
 
 /** @brief Get feed post body
- *  
+ *
  *  @param index Post index
  *  @param username Username
  *  @param body Pointer to char array to retrieve body text
- *  @return 
+ *  @return
  */
 void DeSoLib::getFeed(int index, char *username, char *body)
 {
@@ -314,7 +316,7 @@ void DeSoLib::getFeed(int index, char *username, char *body)
 }
 
 /** @brief Get latest data from node and update single profile
- *  
+ *
  *  @param username Username
  *  @param PublicKeyBase58Check public key
  *  @param prof Pointer to profile
@@ -344,7 +346,7 @@ int DeSoLib::updateSingleProfile(const char *username, const char *PublicKeyBase
     filter["Profile"]["CoinPriceDeSoNanos"] = true;
     filter["Profile"]["CoinEntry"]["CoinsInCirculationNanos"] = true;
     filter["Profile"]["PublicKeyBase58Check"] = true;
-    filter["Profile"]["DESOBalanceNanos"]=true;
+    filter["Profile"]["DESOBalanceNanos"] = true;
 
     // Deserialize the document
     DeserializationError error = deserializeJson(doc, https->getStream(), DeserializationOption::Filter(filter));
@@ -367,7 +369,7 @@ int DeSoLib::updateSingleProfile(const char *username, const char *PublicKeyBase
                 prof->CoinPriceBitCloutNanos = doc["Profile"]["CoinPriceDeSoNanos"];
             prof->CoinsInCirculationNanos = doc["Profile"]["CoinEntry"]["CoinsInCirculationNanos"];
             strcpy(prof->PublicKeyBase58Check, doc["Profile"]["PublicKeyBase58Check"]);
-            prof->BalanceNanos=doc["Profile"]["DESOBalanceNanos"].as<double>();
+            prof->BalanceNanos = doc["Profile"]["DESOBalanceNanos"].as<double>();
             status = 1;
         }
         else
@@ -388,7 +390,7 @@ int DeSoLib::updateSingleProfile(const char *username, const char *PublicKeyBase
 }
 
 /** @brief Clear top holders usernames
- *  
+ *
  *  @param prof Pointer to profile
  *  @return
  */
@@ -401,8 +403,8 @@ void DeSoLib::clearTopHodlersUserNames(Profile *prof)
 }
 
 /** @brief Count post association
- *  
- *  @param transactorPublicKeyBase58Check transactorPublicKeyBase58Check 
+ *
+ *  @param transactorPublicKeyBase58Check transactorPublicKeyBase58Check
  *  @param postHashHex postHashHex
  *  @param reactionCount pointer to ReactionCount
  *  @return status
@@ -468,8 +470,8 @@ int DeSoLib::countPostAssociation(const char *transactorPublicKeyBase58Check, co
 }
 
 /** @brief Count post association
- *  
- *  @param transactorPublicKeyBase58Check transactorPublicKeyBase58Check 
+ *
+ *  @param transactorPublicKeyBase58Check transactorPublicKeyBase58Check
  *  @param postHashHex postHashHex
  *  @param associationValue Association value , example "LIKE" "DISLIKE" "LOVE" "SAD" "ANGRY" "ASTONISHED" "LAUGH"
  *  @param count Pointer to returning count value
@@ -514,9 +516,8 @@ int DeSoLib::countPostAssociationSingle(const char *transactorPublicKeyBase58Che
     return status;
 }
 
-
 /** @brief Update single post
- *  
+ *
  *  @param postHashHex  postHashHex
  *  @param fetchParents bool fetchParents
  *  @param commentOffset int commentOffset
@@ -577,7 +578,7 @@ int DeSoLib::updateSinglePost(const char *postHashHex, bool fetchParents, int co
 }
 
 /** @brief Update Last Num Posts For PublicKey
- *  
+ *
  *  @param PublicKeysBase58Check  PublicKeysBase58Check
  *  @param NumToFetch int NumToFetch
  *  @param prof Profile *prof
@@ -688,7 +689,7 @@ int DeSoLib::updateUsersBalance(const char *PublicKeysBase58Check, Profile *prof
 */
 
 /** @brief generate localtime
- *  
+ *
  *  @param ts  time_t ts
  *  @return timestamp char pointer
  */
@@ -702,7 +703,7 @@ char *DeSoLib::genLocaltime(time_t ts)
 }
 
 /** @brief Update Posts Stateless
- *  
+ *
  *  @param postHashHex  const char *postHashHex
  *  @param readerPublicKeyBase58Check  const char *readerPublicKeyBase58Check
  *  @param numToFetchts  int numToFetch
@@ -779,7 +780,7 @@ int DeSoLib::updatePostsStateless(const char *postHashHex, const char *readerPub
 }
 
 /** @brief Update Posts Stateless Save
- *  
+ *
  *  @param postHashHex  const char *postHashHex
  *  @param readerPublicKeyBase58Check  const char *readerPublicKeyBase58Check
  *  @param getPostsForFollowFeed bool getPostsForFollowFeed
@@ -873,7 +874,7 @@ int DeSoLib::updatePostsStatelessSave(const char *postHashHex, const char *reade
     return status;
 }
 
-/** @brief Ppdate Hodlers For PublicKey 
+/** @brief Ppdate Hodlers For PublicKey
  *
  * @param PublicKeyBase58Check const char *PublicKeyBase58Check
  * @param Username const char *Username
