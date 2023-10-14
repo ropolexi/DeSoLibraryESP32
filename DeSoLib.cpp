@@ -84,7 +84,6 @@ int DeSoLib::updateNodeHealthCheck()
         debug_print(buff_small_1);
         nodePaths[selectedNodeIndex].status = false;
     }
-    client->getString();
     client->end();
     return status;
 }
