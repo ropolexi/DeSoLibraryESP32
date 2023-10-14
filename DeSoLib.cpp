@@ -84,6 +84,7 @@ int DeSoLib::updateNodeHealthCheck()
         debug_print(buff_small_1);
         nodePaths[selectedNodeIndex].status = false;
     }
+    client->getString();
     client->end();
     return status;
 }
@@ -109,6 +110,7 @@ int DeSoLib::updateExchangeRates()
 
     // Deserialize the document
     DeserializationError error = deserializeJson(doc, client->getStream(), DeserializationOption::Filter(filter));
+    client->getString();
     client->end();
 
     if (doc.isNull())
@@ -207,6 +209,7 @@ int DeSoLib::getAppState()
     if (client == NULL)
         return 0;
     DeserializationError error = deserializeJson(doc, client->getStream());
+    client->getString();
     client->end();
     if (doc.isNull())
     {
