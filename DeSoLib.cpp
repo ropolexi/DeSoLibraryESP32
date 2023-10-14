@@ -29,7 +29,18 @@ HTTPClient *DeSoLib::getRequest(const char *apiPath)
     https.addHeader("Content-Type", "application/x-www-form-urlencoded");
     snprintf(buff_small_1, sizeof(buff_small_1), "%s%s", nodePaths[selectedNodeIndex].url, apiPath);
 
-    if (https.begin(espClientSecure, String(buff_small_1)))
+    int status = 0;
+
+    if (buff_small_1[4] == 's')
+    {
+        status = https.begin(espClientSecure, buff_small_1);
+    }
+    else
+    {
+        status = https.begin(buff_small_1);
+    }
+
+    if (status)
     {
         int httpCode = https.GET();
         if (httpCode > 0)
@@ -146,9 +157,20 @@ HTTPClient *DeSoLib::postRequest(const char *apiPath, const char *data)
         espClientSecure.setCACert(nodePaths[selectedNodeIndex].caRootCert);
     else
         espClientSecure.setInsecure();
+
     snprintf(buff_small_1, sizeof(buff_small_1), "%s%s", nodePaths[selectedNodeIndex].url, apiPath);
 
-    if (https.begin(espClientSecure, buff_small_1))
+    int status = 0;
+
+    if (buff_small_1[4] == 's')
+    {
+        status = https.begin(espClientSecure, buff_small_1);
+    }
+    else
+    {
+        status = https.begin(buff_small_1);
+    }
+    if (status)
     {
         // https.addHeader("User-Agent", "Mozilla/5.0");
         https.setUserAgent("Mozilla/5.0");
