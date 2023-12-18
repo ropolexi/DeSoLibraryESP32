@@ -95,7 +95,7 @@ void updateDisplay()
   lcd.print("C:$");
   lcd.print(temp, 1);
 
-  double balanceCents = deso.USDCentsPerBitCloutExchangeRate * ((profile1.BalanceNanos+profile1.UnconfirmedBalanceNanos) / 1000000000.0);
+  double balanceCents = deso.USDCentsPerBitCloutExchangeRate * ((profile1.BalanceNanos) / 1000000000.0);
   temp = balanceCents / 100.0;
   lcd.setCursor(8 - 4, 2);
   lcd.print("        ");
@@ -180,7 +180,7 @@ void loop()
           lcd.setCursor(-4, 3);
           lcd.print("Balance..");
         }
-        deso.updateUsersBalance(profile1.PublicKeyBase58Check, &profile1);
+        //deso.updateUsersBalance(profile1.PublicKeyBase58Check, &profile1);
         Serial.println("Updating hodling asset balance");
         if (initial_run)
         {

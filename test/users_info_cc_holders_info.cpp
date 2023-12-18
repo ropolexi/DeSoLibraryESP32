@@ -85,7 +85,6 @@ void getProfile(const char *username)
   Serial.print("Creator Coin Price:\t\t$");
   double coinPriceUSDCents = deso.USDCentsPerBitCloutExchangeRate * (profile1.CoinPriceBitCloutNanos / 1000000000.0);
   Serial.println(coinPriceUSDCents / 100.0);
-  deso.updateUsersBalance(profile1.PublicKeyBase58Check, &profile1);
   Serial.print("Wallet Balance:\t\t\t$");
   double balanceCents = deso.USDCentsPerBitCloutExchangeRate * ((profile1.BalanceNanos+profile1.UnconfirmedBalanceNanos) / 1000000000.0);
   Serial.println(balanceCents / 100.0);

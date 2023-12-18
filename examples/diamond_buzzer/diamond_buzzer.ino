@@ -78,8 +78,8 @@ void loop()
     digitalWrite(LED_BUILTIN, HIGH);
 
     deso.updateLastNumPostsForPublicKey(profile1.PublicKeyBase58Check, 5, &profile1);
-
-    deso.updateUsersBalance(profile1.PublicKeyBase58Check, &profile1);
+    deso.updateSingleProfile(username, "", &profile1);
+    //deso.updateUsersBalance(profile1.PublicKeyBase58Check, &profile1);
     digitalWrite(LED_BUILTIN, LOW);
 
     if (profile1.lastNPostDiamonds > 0)

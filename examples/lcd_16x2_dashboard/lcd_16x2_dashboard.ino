@@ -137,17 +137,16 @@ void loop()
 
       updateCreatorCoinLCD(temp);
 
-      if (deso.updateUsersBalance(profile1.PublicKeyBase58Check, &profile1))
-      {
-        Serial.print("Wallet Balance:");
-        double balanceCents = deso.USDCentsPerBitCloutExchangeRate * ((profile1.UnconfirmedBalanceNanos + profile1.BalanceNanos) / 1000000000.0);
 
-        temp = balanceCents / 100.0;
-        Serial.print(" $");
-        Serial.println(temp);
+      Serial.print("Wallet Balance:");
+      double balanceCents = deso.USDCentsPerBitCloutExchangeRate * ((profile1.UnconfirmedBalanceNanos + profile1.BalanceNanos) / 1000000000.0);
 
-        updateBalanceLCD(temp);
-      }
+      temp = balanceCents / 100.0;
+      Serial.print(" $");
+      Serial.println(temp);
+
+      updateBalanceLCD(temp);
+      
 
       if (deso.updateHodleAssetBalance("", profile1.PublicKeyBase58Check, &profile1))
       {

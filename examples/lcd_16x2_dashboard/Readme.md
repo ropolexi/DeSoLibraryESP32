@@ -7,7 +7,6 @@ This is to demonstrate the use of deso library to display information about a us
 - https://github.com/bblanchon/ArduinoJson
 - https://github.com/johnrickman/LiquidCrystal_I2C
 - https://github.com/ropolexi/DeSo-Arduino-Lib
-- https://github.com/squix78/json-streaming-parser
 
 ## Components
 ### ESP32 (devkit v1)
